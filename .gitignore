@@ -1,0 +1,11 @@
+.cproject
+.exportMap
+.project
+.rds_delta
+.sdk_delta.info
+.sign/
+.tproject
+*.edj
+Debug/
+Release/
+project_def.prop
