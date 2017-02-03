@@ -3,8 +3,15 @@
 #include <util.h>
 
 void
-img_mouse_down_cb(void *data, Evas *e, Evas_Object *obj, void *event_info)
+_gif_camera_mouse_up_cb(void *data, Evas *e, Evas_Object *obj, void *event_info)
 {
+
+}
+
+void
+_video_picker_mouse_up_cb(void *data, Evas *e, Evas_Object *obj, void *event_info)
+{
+   video_picker_open();
 }
 
 static void
@@ -40,7 +47,7 @@ maker_open()
    evas_object_size_hint_weight_set(img, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(img, 0.5, 0.8);
    evas_object_size_hint_min_set(img, ELM_SCALE_SIZE(111), ELM_SCALE_SIZE(83));
-   evas_object_event_callback_add(img, EVAS_CALLBACK_MOUSE_UP, img_mouse_down_cb, NULL);
+   evas_object_event_callback_add(img, EVAS_CALLBACK_MOUSE_UP, _video_picker_mouse_up_cb, NULL);
    img_path = app_res_path_get("images/img_video_add.png");
    elm_image_file_set(img, img_path, NULL);
    free(img_path);
@@ -58,7 +65,7 @@ maker_open()
    evas_object_size_hint_weight_set(img, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(img, 0.5, 0.8);
    evas_object_size_hint_min_set(img, ELM_SCALE_SIZE(111), ELM_SCALE_SIZE(83));
-   evas_object_event_callback_add(img, EVAS_CALLBACK_MOUSE_UP, img_mouse_down_cb, NULL);
+   evas_object_event_callback_add(img, EVAS_CALLBACK_MOUSE_UP, _gif_camera_mouse_up_cb, NULL);
    img_path = app_res_path_get("images/img_camera.png");
    elm_image_file_set(img, img_path, NULL);
    free(img_path);

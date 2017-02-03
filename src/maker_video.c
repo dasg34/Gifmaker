@@ -5,58 +5,32 @@
 #include <system_info.h>
 #include <media_content.h>
 
-static Eina_Bool scroll_start;
-static Evas_Object *_gif_gengrid;
+static Evas_Object *_video_gengrid;
 
 static void
-_scroll_start_cb(void *data, Evas_Object *obj, void *event_info)
+thumbnail_completed_cb(media_content_error_e error, const char *path, void *data)
 {
-   Eina_List *list, *l;
-   Elm_Object_Item *it;
-   Evas_Object *img;
+   Evas_Object *img = data;
 
-   scroll_start = EINA_TRUE;
-   list = elm_gengrid_realized_items_get(obj);
-
-   if (!list)
-      return;
-
-   EINA_LIST_FOREACH(list, l, it)
-      {
-         img = elm_object_item_part_content_get(it, "elm.swallow.icon");
-
-         if (elm_image_animated_play_get(img))
-            elm_image_animated_play_set(img, EINA_FALSE);
-      }
-}
-
-
-static void
-_scroll_stop_cb(void *data, Evas_Object *obj, void *event_info)
-{
-   Eina_List *list, *l;
-   Elm_Object_Item *it;
-   Evas_Object *img;
-
-   scroll_start = EINA_FALSE;
-   list = elm_gengrid_realized_items_get(obj);
-
-   if (!list)
-      return;
-
-   EINA_LIST_FOREACH(list, l, it)
-      {
-         img = elm_object_item_part_content_get(it, "elm.swallow.icon");
-
-         if (!elm_image_animated_play_get(img))
-            elm_image_animated_play_set(img, EINA_TRUE);
-      }
+   elm_image_file_set(img, path, NULL);
 }
 
 static void
 _layout_back_cb(void *data, Evas_Object *obj, void *event_info)
 {
-   ui_app_exit();
+   elm_naviframe_item_pop(_main_naviframe);
+}
+
+static void
+_btn_cancel_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   elm_naviframe_item_pop(_main_naviframe);
+}
+
+static void
+_btn_done_cb(void *data, Evas_Object *obj, void *event_info)
+{
+
 }
 
 static char *
@@ -73,28 +47,17 @@ _grid_text_get(void *data, Evas_Object *obj, const char *part)
 static Evas_Object *
 _grid_content_get(void *data, Evas_Object *obj, const char *part)
 {
-   char *path;
    media_info_h media = data;
 
    if (strcmp(part, "elm.swallow.icon"))
       return NULL;
 
-   media_info_get_file_path(media, &path);
-
    Evas_Object *img = elm_image_add(obj);
    evas_object_size_hint_weight_set(img, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(img, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_image_file_set(img, path, NULL);
    evas_object_show(img);
 
-   if (elm_image_animated_available_get(img))
-      {
-         elm_image_animated_set(img, EINA_TRUE);
-         if (!scroll_start)
-            elm_image_animated_play_set(img, EINA_TRUE);
-      }
-
-   free(path);
+   media_info_create_thumbnail(media, thumbnail_completed_cb, img);
 
    return img;
 }
@@ -104,15 +67,17 @@ _grid_del(void *data, Evas_Object *obj)
 {
    media_info_h media = data;
 
+   media_info_cancel_thumbnail(media);
+
    media_info_destroy(media);
 }
 
 void
-viewer_orient_set()
+video_picker_orient_set()
 {
    int height, width;
 
-   if (!evas_object_visible_get(_gif_gengrid))
+   if (!evas_object_visible_get(_video_gengrid))
      return;
 
    system_info_get_platform_int("http://tizen.org/feature/screen.width", &width);
@@ -120,16 +85,17 @@ viewer_orient_set()
 
    if (orientation == APP_DEVICE_ORIENTATION_90 ||
        orientation == APP_DEVICE_ORIENTATION_270)
-      elm_gengrid_item_size_set(_gif_gengrid, height / 3, width / 2);
+      elm_gengrid_item_size_set(_video_gengrid, height / 3, width / 2);
    else
-      elm_gengrid_item_size_set(_gif_gengrid, width / 2, height / 4);
+      elm_gengrid_item_size_set(_video_gengrid, width / 2, height / 4);
 }
 
 void
-viewer_open()
+video_picker_open()
 {
    int height, width;
    Elm_Gengrid_Item_Class *gic;
+   Evas_Object *btn;
 
    Evas_Object *layout = my_layout_add(_main_naviframe, "edje/gengrid_layout.edj", "main");
    evas_object_size_hint_weight_set(layout, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
@@ -137,21 +103,17 @@ viewer_open()
    evas_object_show(layout);
 
    Evas_Object *gengrid = elm_gengrid_add(layout);
-   _gif_gengrid = gengrid;
-   evas_object_smart_callback_add(gengrid, "scroll", _scroll_start_cb, NULL);
-   evas_object_smart_callback_add(gengrid, "scroll,drag,stop", _scroll_stop_cb, NULL);
-   evas_object_smart_callback_add(gengrid, "scroll,anim,stop", _scroll_stop_cb, NULL);
+   _video_gengrid = gengrid;
    eext_object_event_callback_add(gengrid, EEXT_CALLBACK_BACK, _layout_back_cb, NULL);
 
    system_info_get_platform_int("http://tizen.org/feature/screen.width", &width);
    system_info_get_platform_int("http://tizen.org/feature/screen.height", &height);
    if (orientation == APP_DEVICE_ORIENTATION_90 ||
        orientation == APP_DEVICE_ORIENTATION_270)
-      elm_gengrid_item_size_set(_gif_gengrid, height / 3, width / 2);
+      elm_gengrid_item_size_set(gengrid, height / 3, width / 2);
    else
-      elm_gengrid_item_size_set(_gif_gengrid, width / 2, height / 4);
+      elm_gengrid_item_size_set(gengrid, width / 2, height / 4);
    elm_gengrid_align_set(gengrid, 0.0, 0.0);
-
 
    gic = elm_gengrid_item_class_new();
    gic->item_style = "type2";
@@ -160,7 +122,7 @@ viewer_open()
    gic->func.del = _grid_del;
 
    evas_object_data_set(gengrid, "item_class", gic);
-   gengrid_item_set(gengrid, "gif");
+   gengrid_item_set(gengrid, "video");
    evas_object_data_del(gengrid, "item_class");
    elm_gengrid_item_class_free(gic);
 
@@ -170,13 +132,24 @@ viewer_open()
          elm_layout_theme_set(nocontents, "layout", "nocontents", "default");
          evas_object_size_hint_weight_set(nocontents, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
          evas_object_size_hint_align_set(nocontents, EVAS_HINT_FILL, EVAS_HINT_FILL);
-         elm_object_part_text_set(nocontents, "elm.text", "No GIFs");
+         elm_object_part_text_set(nocontents, "elm.text", "No Videos");
          elm_layout_signal_emit(nocontents, "align.center", "elm");
          elm_object_part_content_set(layout, "gengrid", nocontents);
       }
    else
       elm_object_part_content_set(layout, "gengrid", gengrid);
 
-   evas_object_del(elm_object_content_unset(_main_naviframe));
-   elm_object_content_set(_main_naviframe, layout);
+   Elm_Object_Item *nf_it = elm_naviframe_item_push(_main_naviframe, "Video Picker", NULL, NULL, layout, NULL);
+
+   btn = elm_button_add(_main_naviframe);
+   elm_object_style_set(btn, "naviframe/title_left");
+   evas_object_smart_callback_add(btn, "clicked", _btn_cancel_cb, NULL);
+   elm_object_item_part_content_set(nf_it, "title_left_btn", btn);
+   elm_object_text_set(btn, "CANCEL");
+
+   btn = elm_button_add(_main_naviframe);
+   elm_object_style_set(btn, "naviframe/title_right");
+   evas_object_smart_callback_add(btn, "clicked", _btn_done_cb, NULL);
+   elm_object_item_part_content_set(nf_it, "title_right_btn", btn);
+   elm_object_text_set(btn, "DONE");
 }

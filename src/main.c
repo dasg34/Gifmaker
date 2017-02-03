@@ -88,6 +88,8 @@ create_base_gui()
 static bool
 app_create(void *data)
 {
+   elm_config_accel_preference_set("gl");
+
 	create_base_gui();
 
 	return true;
@@ -142,6 +144,7 @@ ui_app_orient_changed(app_event_info_h event_info, void *user_data)
 {
    app_event_get_device_orientation(event_info, &orientation);
    viewer_orient_set();
+   video_picker_orient_set();
 
 	return;
 }
