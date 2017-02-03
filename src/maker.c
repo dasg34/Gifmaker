@@ -2,13 +2,13 @@
 #include <view.h>
 #include <util.h>
 
-void
+static void
 _gif_camera_mouse_up_cb(void *data, Evas *e, Evas_Object *obj, void *event_info)
 {
 
 }
 
-void
+static void
 _video_picker_mouse_up_cb(void *data, Evas *e, Evas_Object *obj, void *event_info)
 {
    video_picker_open();

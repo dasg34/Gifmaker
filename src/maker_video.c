@@ -2,10 +2,57 @@
 #include <view.h>
 #include <util.h>
 
+#include <player.h>
 #include <system_info.h>
 #include <media_content.h>
 
 static Evas_Object *_video_gengrid;
+static player_h player;
+
+static void
+_simple_video_player_close()
+{
+   player_stop(player);
+   player_unprepare(player);
+   player_destroy(player);
+   elm_naviframe_item_pop(_main_naviframe);
+}
+
+static void
+_rect_mouse_up_cb(void *data, Evas *e, Evas_Object *obj, void *event_info)
+{
+   _simple_video_player_close();
+}
+
+static void
+_player_completed_cb(void *user_data)
+{
+   _simple_video_player_close();
+}
+
+static void
+_rect_back_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   _simple_video_player_close();
+}
+
+static void
+_simple_video_player_open(char *path)
+{
+   Evas_Object *rect = evas_object_image_filled_add(_main_naviframe);
+   evas_object_size_hint_weight_set(rect, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   eext_object_event_callback_add(rect, EEXT_CALLBACK_BACK, _rect_back_cb, NULL);
+   evas_object_event_callback_add(rect, EVAS_CALLBACK_MOUSE_UP, _rect_mouse_up_cb, NULL);
+   evas_object_show(rect);
+   elm_naviframe_item_simple_push(_main_naviframe, rect);
+
+   player_create(&player);
+   player_set_completed_cb(player, _player_completed_cb, NULL);
+   player_set_uri(player, path);
+   player_set_display(player, PLAYER_DISPLAY_TYPE_EVAS, GET_DISPLAY(rect));
+   player_prepare(player);
+   player_start(player);
+}
 
 static void
 thumbnail_completed_cb(media_content_error_e error, const char *path, void *data)
@@ -16,9 +63,27 @@ thumbnail_completed_cb(media_content_error_e error, const char *path, void *data
 }
 
 static void
-_layout_back_cb(void *data, Evas_Object *obj, void *event_info)
+_gengrid_back_cb(void *data, Evas_Object *obj, void *event_info)
 {
    elm_naviframe_item_pop(_main_naviframe);
+}
+
+static void
+_gengrid_longpress_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   char *path;
+   Elm_Object_Item *it;
+   media_info_h media;
+
+   it = event_info;
+   media = elm_object_item_data_get(it);
+
+   media_info_get_file_path(media, &path);
+
+   _simple_video_player_open(path);
+
+   free(path);
+
 }
 
 static void
@@ -104,7 +169,8 @@ video_picker_open()
 
    Evas_Object *gengrid = elm_gengrid_add(layout);
    _video_gengrid = gengrid;
-   eext_object_event_callback_add(gengrid, EEXT_CALLBACK_BACK, _layout_back_cb, NULL);
+   eext_object_event_callback_add(gengrid, EEXT_CALLBACK_BACK, _gengrid_back_cb, NULL);
+   evas_object_smart_callback_add(gengrid, "longpressed", _gengrid_longpress_cb, NULL);
 
    system_info_get_platform_int("http://tizen.org/feature/screen.width", &width);
    system_info_get_platform_int("http://tizen.org/feature/screen.height", &height);
