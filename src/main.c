@@ -1,4 +1,9 @@
 #include <private.h>
+#include <view.h>
+#include <util.h>
+
+Evas_Object *_main_naviframe, *_main_layout;
+app_device_orientation_e orientation;
 
 static void
 win_delete_request_cb(void *data, Evas_Object *obj, void *event_info)
@@ -6,19 +11,22 @@ win_delete_request_cb(void *data, Evas_Object *obj, void *event_info)
 	ui_app_exit();
 }
 
-static void
-layout_back_cb(void *data, Evas_Object *obj, void *event_info)
+void
+_maker_select_cb(void *data, Evas_Object *obj, void *event_info)
 {
-   Evas_Object *win = data;
+   maker_open();
+}
 
-	elm_win_lower(win);
+void
+_viewer_select_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   viewer_open();
 }
 
 static void
 create_base_gui()
 {
    char *img_path;
-   Elm_Object_Item *nf_it;
 
 	Evas_Object *win = elm_win_util_standard_add(PACKAGE, PACKAGE);
 	elm_win_conformant_set(win, EINA_TRUE);
@@ -43,38 +51,35 @@ create_base_gui()
 
    /* Naviframe */
    Evas_Object *naviframe = elm_naviframe_add(conform);
+   _main_naviframe = naviframe;
    evas_object_size_hint_weight_set(naviframe, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    elm_object_content_set(conform, naviframe);
    evas_object_show(naviframe);
 
-	/* Base Layout */
-	Evas_Object *layout = elm_layout_add(naviframe);
-	elm_layout_theme_set(layout, "layout", "application", "default");
-	evas_object_size_hint_weight_set(layout, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-	eext_object_event_callback_add(layout, EEXT_CALLBACK_BACK, layout_back_cb, win);
-	evas_object_show(layout);
-	nf_it = elm_naviframe_item_simple_push(naviframe, layout);
-
 	/* toolbar */
-	Evas_Object *toolbar = elm_toolbar_add(layout);
+	Evas_Object *toolbar = elm_toolbar_add(naviframe);
    elm_object_style_set(toolbar, "tabbar");
    elm_toolbar_select_mode_set(toolbar, ELM_OBJECT_SELECT_MODE_ALWAYS);
    elm_toolbar_shrink_mode_set(toolbar, ELM_TOOLBAR_SHRINK_EXPAND);
    elm_toolbar_transverse_expanded_set(toolbar, EINA_TRUE);
    evas_object_show(toolbar);
 
-#define TOOLBAR_ITEM_ADD(name, path) \
+#define TOOLBAR_ITEM_ADD(name, path, cb, data) \
       img_path = app_res_path_get(path); \
-      elm_toolbar_item_append(toolbar, img_path, name, NULL, NULL); \
+      elm_toolbar_item_append(toolbar, img_path, name, cb, data); \
       free(img_path);
 
-   TOOLBAR_ITEM_ADD("GIF", "images/ic_gif.png");
-   TOOLBAR_ITEM_ADD("Video", "images/ic_video.png");
-   TOOLBAR_ITEM_ADD("Camera", "images/ic_camera.png");
-   TOOLBAR_ITEM_ADD("Settings", "images/ic_setting.png");
+   TOOLBAR_ITEM_ADD("Maker", "images/ic_maker.png", _maker_select_cb, NULL);
+   TOOLBAR_ITEM_ADD("Viewer", "images/ic_gif.png", _viewer_select_cb, NULL);
+   //TOOLBAR_ITEM_ADD("Settings", "images/ic_setting.png", NULL, NULL);
+   //TOOLBAR_ITEM_ADD("Video", "images/ic_video.png", _video_select_cb, NULL);
+   //TOOLBAR_ITEM_ADD("Camera", "images/ic_camera.png", NULL, NULL);
 
+
+   Elm_Object_Item *nf_it = elm_naviframe_item_push(naviframe, NULL, NULL, NULL, NULL, "tabbar/icon/notitle");
    elm_naviframe_item_style_set(nf_it, "tabbar/icon/notitle");
    elm_object_item_part_content_set(nf_it, "tabbar", toolbar);
+   maker_open();
 
 	/* Show window after base gui is set up */
 	evas_object_show(win);
@@ -135,7 +140,9 @@ ui_app_lang_changed(app_event_info_h event_info, void *user_data)
 static void
 ui_app_orient_changed(app_event_info_h event_info, void *user_data)
 {
-	/*APP_EVENT_DEVICE_ORIENTATION_CHANGED*/
+   app_event_get_device_orientation(event_info, &orientation);
+   viewer_orient_set();
+
 	return;
 }
 

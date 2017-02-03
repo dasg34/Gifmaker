@@ -1,8 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <manifest xmlns="http://tizen.org/ns/packages" api-version="2.4" package="org.yohoho.gifmaker" version="1.0.0">
-	<profile name="mobile" />
-	<ui-application appid="org.yohoho.gifmaker" exec="gifmaker" type="capp" multiple="false" taskmanage="true" nodisplay="false" launch_mode="single">
-		<icon>gifmaker.png</icon>
-		<label>gifmaker</label>
-	</ui-application>
+    <profile name="mobile"/>
+    <ui-application appid="org.yohoho.gifmaker" exec="gifmaker" launch_mode="single" multiple="false" nodisplay="false" taskmanage="true" type="capp">
+        <label>gifmaker</label>
+        <icon>gifmaker.png</icon>
+    </ui-application>
+    <privileges>
+        <privilege>http://tizen.org/privilege/mediastorage</privilege>
+        <privilege>http://tizen.org/privilege/appmanager.launch</privilege>
+        <privilege>http://tizen.org/privilege/externalstorage</privilege>
+    </privileges>
 </manifest>

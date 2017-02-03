@@ -16,9 +16,9 @@
 #define PACKAGE "org.yohoho.gifmaker"
 #endif
 
+extern Evas_Object *_main_naviframe, *_main_layout;
 
-char *app_res_path_get(const char *res_name);
+extern app_device_orientation_e orientation;
 
-Evas_Object *my_layout_add(Evas_Object *parent, const char *edj_name, const char *group);
 
 #endif /* __gifmaker_H__ */
