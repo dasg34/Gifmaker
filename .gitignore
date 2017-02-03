@@ -8,4 +8,5 @@
 *.edj
 Debug/
 Release/
+crash-info/
 project_def.prop
