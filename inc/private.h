@@ -20,5 +20,6 @@ extern Evas_Object *_main_naviframe, *_main_layout;
 
 extern app_device_orientation_e orientation;
 
+int gifsicle(int argc, char *argv[]);
 
 #endif /* __gifmaker_H__ */
