@@ -95,7 +95,23 @@ _btn_cancel_cb(void *data, Evas_Object *obj, void *event_info)
 static void
 _btn_done_cb(void *data, Evas_Object *obj, void *event_info)
 {
+   Evas_Object *gengrid = data;
+   Elm_Object_Item *it;
+   media_info_h media;
+   char *path;
 
+   it = elm_gengrid_selected_item_get(gengrid);
+
+   if (!it)
+      {
+         //TODO: pleas select item;
+         return;
+      }
+   media = elm_object_item_data_get(it);
+
+   media_info_get_file_path(media, &path);
+
+   gif_maker_open(path);
 }
 
 static char *
@@ -215,7 +231,7 @@ video_picker_open()
 
    btn = elm_button_add(_main_naviframe);
    elm_object_style_set(btn, "naviframe/title_right");
-   evas_object_smart_callback_add(btn, "clicked", _btn_done_cb, NULL);
+   evas_object_smart_callback_add(btn, "clicked", _btn_done_cb, gengrid);
    elm_object_item_part_content_set(nf_it, "title_right_btn", btn);
    elm_object_text_set(btn, "DONE");
 }
