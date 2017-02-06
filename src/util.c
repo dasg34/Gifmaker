@@ -107,4 +107,5 @@ gengrid_item_set(Evas_Object *grid, const char *type)
    media_info_foreach_media_from_db(filter, _media_item_cb, grid);
 
    media_filter_destroy(filter);
+   media_content_disconnect();
 }
