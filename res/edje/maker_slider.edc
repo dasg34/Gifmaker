@@ -1,0 +1,115 @@
+collections {
+   images {
+      image: "img_slider_bg.png" COMP;
+   }
+   group { name: "main";
+      parts {
+         part { name: "slider_bg";
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.0 0.25;
+                  to: "slider";
+                  offset: -15 0;
+               }
+               rel2 {
+                  relative: 1.0 0.75;
+                  to: "slider";
+                  offset: 15 0;
+               }
+               image {
+                  normal: "img_slider_bg.png";
+                  border: 30 30 30 30;
+               }
+               color: 255 255 255 255;
+            }
+         }
+         part { name: "padding.left";
+            type: SWALLOW;
+            description { state: "default" 0.0;
+               rel2.relative: 0.0 1.0;
+               align: 0 0;
+            }
+         }
+         part { name: "padding.right";
+            type: SWALLOW;
+            description { state: "default" 0.0;
+               rel1.relative: 1.0 0.0;
+               align: 1 0;
+            }
+         }
+         part { name: "slider";
+            type: SWALLOW;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to: "padding.left";
+               }
+               rel2 {
+                  relative: 0.0 1.0;
+                  to: "padding.right";
+               }
+            }
+         }
+         part { name: "start_clipper";
+            type: SWALLOW;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.0 0.1;
+                  to_x: "slider";
+                  to_y: "slider_bg";
+               }
+               rel2 {
+                  relative: 0.0 0.9;
+                  to_x: "slider";
+                  to_y: "slider_bg";
+               }
+               align: 0 0;
+            }
+         }
+         part { name: "end_clipper";
+            type: SWALLOW;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 0.1;
+                  to_x: "slider";
+                  to_y: "slider_bg";
+               }
+               rel2 {
+                  relative: 1.0 0.9;
+                  to_x: "slider";
+                  to_y: "slider_bg";
+               }
+               align: 1 0;
+            }
+         }
+         part { name: "start_point";
+            type: SWALLOW;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to: "start_clipper";
+               }
+               rel2 {
+                  to: "start_clipper";
+               }
+               align: 1 0.5;
+               color: 228 142 0 255;
+            }
+         }
+         part { name: "end_point";
+            type: SWALLOW;
+            description { state: "default" 0.0;
+               rel1 {
+                  to: "end_clipper";
+               }
+               rel2 {
+                  relative: 0.0 1.0;
+                  to: "end_clipper";
+               }
+               align: 0 0.5;
+               color: 228 142 0 255;
+            }
+         }
+      }
+   }
+}

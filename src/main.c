@@ -116,6 +116,7 @@ app_resume(void *data)
 static void
 app_terminate(void *data)
 {
+   dlog_print(DLOG_INFO, LOG_TAG, "app_terminate");
 	/* Release all resources. */
 }
 
@@ -164,6 +165,9 @@ ui_app_low_battery(app_event_info_h event_info, void *user_data)
 static void
 ui_app_low_memory(app_event_info_h event_info, void *user_data)
 {
+   int state;
+   app_event_get_low_memory_status(event_info, &state);
+   dlog_print(DLOG_ERROR, LOG_TAG, "ui_app_low_memory : %d", state);
 	/*APP_EVENT_LOW_MEMORY*/
 }
 

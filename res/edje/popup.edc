@@ -1,0 +1,100 @@
+#define POPUP_PROGRESSBAR_VIEW_LAYOUT_PADDING_INC 15 27
+#define POPUP_PROGRESSBAR_VIEW_LAYOUT_TEXT_FONT_SIZE_INC 24 38
+#define POPUP_PROGRESSBAR_VIEW_LAYOUT_BG_INC 0 69
+#define POPUP_PROGRESSBAR_VIEW_LAYOUT_BG_MIN_INC 0 161
+collections {
+   base_scale: 2.6;
+   group { name: "progressbar";
+      styles {
+         style { name: "popup_progress_style";
+         base: "font=Tizen:style=Regular align=right font_size="14" color=#000000 wrap=mixed ellipsis=1.0 text_class=tizen";
+            tag:  "br" "\n";
+            tag:  "tab" "\t";
+         }
+      }
+      parts {
+         part { name: "bg";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               min: POPUP_PROGRESSBAR_VIEW_LAYOUT_BG_MIN_INC;
+               fixed: 1 0;
+            }
+         }
+         part { name: "pad_l_t";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               min: POPUP_PROGRESSBAR_VIEW_LAYOUT_PADDING_INC;
+               max: POPUP_PROGRESSBAR_VIEW_LAYOUT_PADDING_INC;
+               fixed: 1 1;
+               rel2.relative: 0.0 0.0;
+               align: 0.0 0.0;
+            }
+         }
+         part { name: "pad_r_t";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               min: POPUP_PROGRESSBAR_VIEW_LAYOUT_PADDING_INC;
+               max: POPUP_PROGRESSBAR_VIEW_LAYOUT_PADDING_INC;
+               fixed: 1 1;
+               rel1.relative: 1.0 1.0;
+               align: 1.0 1.0;
+            }
+         }
+         part { name: "elm.text.description";
+            type: TEXT;
+            scale: 1;
+            description { state: "default" 0.0;
+               fixed: 0 1;
+               min: POPUP_PROGRESSBAR_VIEW_LAYOUT_TEXT_FONT_SIZE_INC;
+               rel1 {
+                  relative: 1.0 1.0;
+                  to: "pad_l_t";
+               }
+               rel2 {
+                  relative: 0.0 1.0;
+                  to_x: "pad_r_t";
+                  to_y: "pad_l_t";
+               }
+               text {
+                  style: "popup_processing_style";
+                  min: 0 1;
+                  size: 24;
+               }
+               color: 0 0 0 255;
+               align: 0.0 0.0;
+            }
+         }
+         part { name: "progressbar_bg";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               fixed: 0 1;
+               min: POPUP_PROGRESSBAR_VIEW_LAYOUT_BG_INC;
+               rel1 {
+                  relative: 1.0 1.0;
+                  to_x: "pad_l_t";
+                  to_y: "elm.text.description";
+               }
+               rel2 {
+                  relative: 0.0 1.0;
+                  to_x: "pad_r_t";
+                  to_y: "elm.text.description";
+               }
+               align: 0.0 0.0;
+            }
+         }
+         part { name: "progressbar";
+            type: SWALLOW;
+            scale: 1;
+            description { state: "default" 0.0;
+               fixed: 0 1;
+               rel1.to: "progressbar_bg";
+               rel2.to: "progressbar_bg";
+            }
+         }
+      }
+   }
+}
