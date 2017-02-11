@@ -1,19 +1,27 @@
+#define POINT_WIDTH 3
+#define POINT_SIZE 25
+
 collections {
+   base_scale: 2.6;
    images {
       image: "img_slider_bg.png" COMP;
+      image: "ic_point.png" COMP;
    }
    group { name: "main";
       parts {
          part { name: "slider_bg";
+            scale: 1;
             description { state: "default" 0.0;
                rel1 {
-                  relative: 0.0 0.25;
-                  to: "slider";
+                  relative: 1.0 0.25;
+                  to_x: "padding.left";
+                  to_y: "slider";
                   offset: -15 0;
                }
                rel2 {
-                  relative: 1.0 0.75;
-                  to: "slider";
+                  relative: 0.0 0.75;
+                  to_x: "padding.right";
+                  to_y: "slider";
                   offset: 15 0;
                }
                image {
@@ -24,90 +32,379 @@ collections {
             }
          }
          part { name: "padding.left";
-            type: SWALLOW;
+            scale: 1;
+            type: SPACER;
             description { state: "default" 0.0;
                rel2.relative: 0.0 1.0;
                align: 0 0;
+               min: 35 0;
             }
          }
          part { name: "padding.right";
-            type: SWALLOW;
+            scale: 1;
+            type: SPACER;
             description { state: "default" 0.0;
                rel1.relative: 1.0 0.0;
                align: 1 0;
+               min: 35 0;
             }
          }
          part { name: "slider";
+            scale: 1;
             type: SWALLOW;
             description { state: "default" 0.0;
                rel1 {
-                  relative: 1.0 0.0;
-                  to: "padding.left";
+                  relative: 1.0 0.5;
+                  to_x: "padding.left";
                }
                rel2 {
-                  relative: 0.0 1.0;
-                  to: "padding.right";
+                  relative: 0.0 0.5;
+                  to_x: "padding.right";
                }
             }
          }
-         part { name: "start_clipper";
-            type: SWALLOW;
+         part { name: "dragspace";
+            scale: 1;
+            type: SPACER;
             description { state: "default" 0.0;
                rel1 {
-                  relative: 0.0 0.1;
-                  to_x: "slider";
+                  relative: 1.0 0.0;
+                  to_x: "padding.left";
                   to_y: "slider_bg";
                }
                rel2 {
-                  relative: 0.0 0.9;
-                  to_x: "slider";
+                  relative: 0.0 1.0;
+                  to_x: "padding.right";
                   to_y: "slider_bg";
                }
-               align: 0 0;
+            }
+         }
+
+         part { name: "start_clipper";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.0 0.26;
+                  to: "slider";
+               }
+               rel2 {
+                  relative: 0.0 0.74;
+                  to_x: "start_bar";
+                  to_y: "slider";
+               }
+               color: 249 249 249 255;
             }
          }
          part { name: "end_clipper";
-            type: SWALLOW;
+            type: RECT;
+            scale: 1;
             description { state: "default" 0.0;
                rel1 {
-                  relative: 1.0 0.1;
-                  to_x: "slider";
-                  to_y: "slider_bg";
+                  relative: 0.0 0.26;
+                  to_x: "end_bar";
+                  to_y: "slider";
                }
                rel2 {
-                  relative: 1.0 0.9;
-                  to_x: "slider";
-                  to_y: "slider_bg";
+                  relative: 1.0 0.74;
+                  to: "slider";
                }
-               align: 1 0;
+               color: 249 249 249 255;
+            }
+         }
+
+         part { name: "start_bar";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0 0;
+                  to_x: "start_drag_point";
+                  to_y: "dragspace";
+                  offset: 0 -POINT_SIZE/2;
+               }
+               rel2 {
+                  relative: 0 1;
+                  to_x: "start_drag_point";
+                  to_y: "dragspace";
+               }
+               min: POINT_WIDTH 0;
+               align: 1 0.0;
+               color: 188 3 31 255;
+            }
+            description { state: "fixed" 0.0;
+               inherit: "default" 0.0;
+               rel1 {
+                  to: "end_bar";
+                  offset: 0 0;
+               }
+               rel2 {
+                  relative: 0 1;
+                  to: "end_bar";
+               }
             }
          }
          part { name: "start_point";
-            type: SWALLOW;
+            scale: 1;
+            description { state: "default" 0.0;
+               image.normal: "ic_point.png";
+               rel1 {
+                  to: "start_bar";
+                  offset: 0 -POINT_SIZE/2;
+               }
+               rel2 {
+                  relative: 1.0 0.0;
+                  to: "start_bar";
+               }
+               min: POINT_SIZE POINT_SIZE;
+               align: 0.5 1.0;
+               color: 188 3 31 255;
+            }
+         }
+         part { name: "end_bar";
+            type: RECT;
+            scale: 1;
             description { state: "default" 0.0;
                rel1 {
                   relative: 1.0 0.0;
-                  to: "start_clipper";
+                  to_x: "end_drag_point";
+                  to_y: "dragspace";
+                  offset: 0 -POINT_SIZE/2;
                }
                rel2 {
-                  to: "start_clipper";
+                  relative: 1.0 1.0;
+                  to_x: "end_drag_point";
+                  to_y: "dragspace";
                }
-               align: 1 0.5;
-               color: 228 142 0 255;
+               min: POINT_WIDTH 0;
+               align: 0.0 0.0;
+               color: 91 221 55 255;
+            }
+            description { state: "fixed" 0.0;
+               inherit: "default" 0.0;
+               rel1 {
+                  relative: 1 0;
+                  to: "start_bar";
+                  offset: 0 0;
+               }
+               rel2 {
+                  to: "start_bar";
+               }
             }
          }
          part { name: "end_point";
-            type: SWALLOW;
+            scale: 1;
             description { state: "default" 0.0;
+               image.normal: "ic_point.png";
                rel1 {
-                  to: "end_clipper";
+                  to: "end_bar";
+                  offset: 0 -POINT_SIZE/2;
                }
                rel2 {
-                  relative: 0.0 1.0;
-                  to: "end_clipper";
+                  relative: 1.0 0.0;
+                  to: "end_bar";
                }
-               align: 0 0.5;
-               color: 228 142 0 255;
+               min: POINT_SIZE POINT_SIZE;
+               align: 0.5 1.0;
+               color: 91 221 55 255;
+            }
+         }
+         part { name: "start_drag_point";
+            type: RECT;
+            scale: 1;
+            dragable {
+               x: 1 1 0;
+               confine: "dragspace";
+            }
+            description { state: "default" 0.0;
+               min: 0 1;
+               color: 0 255 0 0;
+            }
+         }
+         part { name: "end_drag_point";
+            type: RECT;
+            scale: 1;
+            dragable {
+               x: -1 1 0;
+               confine: "dragspace";
+            }
+            description { state: "default" 0.0;
+               min: 0 1;
+               color: 255 0 0 0;
+            }
+         }
+         part { name: "start_drag_block";
+            type: RECT;
+            scale: 1;
+            dragable {
+               events: "start_drag_point";
+            }
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.5 0.5;
+                  to: "start_point";
+               }
+               rel2 {
+                  relative: 0.5 0.5;
+                  to: "start_point";
+               }
+               min: POINT_SIZE*2 POINT_SIZE*2;
+               color: 0 0 0 0;
+            }
+         }
+         part { name: "end_drag_block";
+            type: RECT;
+            scale: 1;
+            dragable {
+               events: "end_drag_point";
+            }
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.5 0.5;
+                  to: "end_point";
+               }
+               rel2 {
+                  relative: 0.5 0.5;
+                  to: "end_point";
+               }
+               min: POINT_SIZE*2 POINT_SIZE*2;
+               color: 0 0 0 0;
+            }
+         }
+         part { name: "start_point_big";
+            scale: 1;
+            description { state: "default" 0.0;
+               image.normal: "ic_point.png";
+               rel1 {
+                  relative: 0.5 0.5;
+                  to: "start_point";
+               }
+               rel2 {
+                  relative: 0.5 0.5;
+                  to: "start_point";
+               }
+               min: 0 0;
+               color: 188 3 31 255;
+            }
+            description { state: "show" 0.0;
+               inherit: "default" 0.0;
+               min: POINT_SIZE*2 POINT_SIZE*2;
+            }
+         }
+         part { name: "end_point_big";
+            scale: 1;
+            description { state: "default" 0.0;
+               image.normal: "ic_point.png";
+               rel1 {
+                  relative: 0.5 0.5;
+                  to: "end_point";
+               }
+               rel2 {
+                  relative: 0.5 0.5;
+                  to: "end_point";
+               }
+               min: 0 0;
+               color: 91 221 55 255;
+            }
+            description { state: "show" 0.0;
+               inherit: "default" 0.0;
+               min: POINT_SIZE*2 POINT_SIZE*2;
+            }
+         }
+      }
+      programs {
+         program { 
+            signal: "mouse,down,*";
+            source: "start_drag_point";
+            action: STATE_SET "show" 0.0;
+            target: "start_point_big";
+            transition: LINEAR 0.2;
+         }
+         program {
+            signal: "mouse,up,*";
+            source: "start_drag_point";
+            action: STATE_SET "default" 0.0;
+            target: "start_point_big";
+            transition: LINEAR 0.2;
+         }
+         program {
+            signal: "mouse,down,*";
+            source: "end_drag_point";
+            action: STATE_SET "show" 0.0;
+            target: "end_point_big";
+            transition: LINEAR 0.2;
+         }
+         program {
+            signal: "mouse,up,*";
+            source: "end_drag_point";
+            action: STATE_SET "default" 0.0;
+            target: "end_point_big";
+            transition: LINEAR 0.2;
+         }
+         program { 
+            signal: "drag";
+            source: "start_drag_point";
+            script {
+               new Float:sx, Float:sy;
+               new Float:ex, Float:ey;
+               get_drag(PART:"start_drag_point", sx, sy);
+               get_drag(PART:"end_drag_point", ex, ey);
+
+               if (sx > 1 - ex)
+               set_state(PART:"start_bar", "fixed", 0.0);
+               else
+               set_state(PART:"start_bar", "default", 0.0);
+
+               emit("start,point,drag", "");
+            }
+         }
+         program { 
+            signal: "drag,stop";
+            source: "start_drag_point";
+            script {
+               new Float:sx, Float:sy;
+               new Float:ex, Float:ey;
+               get_drag(PART:"start_drag_point", sx, sy);
+               get_drag(PART:"end_drag_point", ex, ey);
+
+               if (sx > 1 - ex) {
+                  set_drag(PART:"start_drag_point", 1 - ex, ey);
+                  set_state(PART:"start_bar", "default",0.0);
+               }
+               emit("start,point,drag,stop", "");
+            }
+         }
+         program { 
+            signal: "drag";
+            source: "end_drag_point";
+            script {
+               new Float:sx, Float:sy;
+               new Float:ex, Float:ey;
+               get_drag(PART:"start_drag_point", sx, sy);
+               get_drag(PART:"end_drag_point", ex, ey);
+
+               if (sx > 1 - ex)
+               set_state(PART:"end_bar", "fixed", 0.0);
+               else
+               set_state(PART:"end_bar", "default", 0.0);
+
+               emit("end,point,drag", "");
+            }
+         }
+         program { 
+            signal: "drag,stop";
+            source: "end_drag_point";
+            script {
+               new Float:sx, Float:sy;
+               new Float:ex, Float:ey;
+               get_drag(PART:"start_drag_point", sx, sy);
+               get_drag(PART:"end_drag_point", ex, ey);
+
+               if (sx > 1 - ex) {
+                  set_drag(PART:"end_drag_point", 1 - sx, sy);
+                  set_state(PART:"end_bar", "default",0.0);
+               }
+
             }
          }
       }
