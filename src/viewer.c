@@ -6,7 +6,6 @@
 #include <media_content.h>
 
 static Eina_Bool scroll_start;
-static Evas_Object *_gif_gengrid;
 
 static void
 _scroll_start_cb(void *data, Evas_Object *obj, void *event_info)
@@ -108,21 +107,24 @@ _grid_del(void *data, Evas_Object *obj)
 }
 
 void
-viewer_orient_set()
+viewer_orient_set(Evas_Object *gengrid)
 {
    int height, width;
-
-   if (!evas_object_visible_get(_gif_gengrid))
-     return;
+   int rotation = elm_win_rotation_get(_win);
 
    system_info_get_platform_int("http://tizen.org/feature/screen.width", &width);
    system_info_get_platform_int("http://tizen.org/feature/screen.height", &height);
 
-   if (orientation == APP_DEVICE_ORIENTATION_90 ||
-       orientation == APP_DEVICE_ORIENTATION_270)
-      elm_gengrid_item_size_set(_gif_gengrid, height / 3, width / 2);
+   if (rotation == 90 || rotation == 270)
+      elm_gengrid_item_size_set(gengrid, height / 3, width / 2);
    else
-      elm_gengrid_item_size_set(_gif_gengrid, width / 2, height / 4);
+      elm_gengrid_item_size_set(gengrid, width / 2, height / 4);
+}
+
+static void
+_win_rotation_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   viewer_orient_set((Evas_Object *)data);
 }
 
 void
@@ -137,21 +139,12 @@ viewer_open()
    evas_object_show(layout);
 
    Evas_Object *gengrid = elm_gengrid_add(layout);
-   _gif_gengrid = gengrid;
    evas_object_smart_callback_add(gengrid, "scroll", _scroll_start_cb, NULL);
    evas_object_smart_callback_add(gengrid, "scroll,drag,stop", _scroll_stop_cb, NULL);
    evas_object_smart_callback_add(gengrid, "scroll,anim,stop", _scroll_stop_cb, NULL);
    eext_object_event_callback_add(gengrid, EEXT_CALLBACK_BACK, _layout_back_cb, NULL);
-
-   system_info_get_platform_int("http://tizen.org/feature/screen.width", &width);
-   system_info_get_platform_int("http://tizen.org/feature/screen.height", &height);
-   if (orientation == APP_DEVICE_ORIENTATION_90 ||
-       orientation == APP_DEVICE_ORIENTATION_270)
-      elm_gengrid_item_size_set(_gif_gengrid, height / 3, width / 2);
-   else
-      elm_gengrid_item_size_set(_gif_gengrid, width / 2, height / 4);
    elm_gengrid_align_set(gengrid, 0.0, 0.0);
-
+   viewer_orient_set(gengrid);
 
    gic = elm_gengrid_item_class_new();
    gic->item_style = "type2";
@@ -179,4 +172,6 @@ viewer_open()
 
    evas_object_del(elm_object_content_unset(_main_naviframe));
    elm_object_content_set(_main_naviframe, layout);
+
+   evas_object_smart_callback_add(_win, "wm,rotation,changed", _win_rotation_cb, gengrid);
 }

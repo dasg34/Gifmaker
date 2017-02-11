@@ -6,8 +6,35 @@
 #include <system_info.h>
 #include <media_content.h>
 
-static Evas_Object *_video_gengrid;
 static player_h player;
+
+static void
+_popup_btn_clicked_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   Evas_Object *popup = data;
+   evas_object_del(popup);
+}
+
+static void
+_popup_open()
+{
+   Evas_Object *popup;
+   Evas_Object *btn1;
+
+   /* popup */
+   popup = elm_popup_add(_main_naviframe);
+   elm_popup_align_set(popup, ELM_NOTIFY_ALIGN_FILL, 1.0);
+   eext_object_event_callback_add(popup, EEXT_CALLBACK_BACK, eext_popup_back_cb, NULL);
+   elm_object_text_set(popup,"Please select a vidio want to make gif"); //FIXME: wording
+
+   /* ok button */
+   btn1 = elm_button_add(popup);
+   elm_object_style_set(btn1, "popup");
+   elm_object_text_set(btn1, "OK");
+   elm_object_part_content_set(popup, "button1", btn1);
+   evas_object_smart_callback_add(btn1, "clicked", _popup_btn_clicked_cb, popup);
+   evas_object_show(popup);
+}
 
 static void
 _simple_video_player_close()
@@ -104,7 +131,7 @@ _btn_done_cb(void *data, Evas_Object *obj, void *event_info)
 
    if (!it)
       {
-         //TODO: pleas select item;
+         _popup_open();
          return;
       }
    media = elm_object_item_data_get(it);
@@ -154,21 +181,24 @@ _grid_del(void *data, Evas_Object *obj)
 }
 
 void
-video_picker_orient_set()
+video_picker_orient_set(Evas_Object *gengrid)
 {
    int height, width;
-
-   if (!evas_object_visible_get(_video_gengrid))
-     return;
+   int rotation = elm_win_rotation_get(_win);
 
    system_info_get_platform_int("http://tizen.org/feature/screen.width", &width);
    system_info_get_platform_int("http://tizen.org/feature/screen.height", &height);
 
-   if (orientation == APP_DEVICE_ORIENTATION_90 ||
-       orientation == APP_DEVICE_ORIENTATION_270)
-      elm_gengrid_item_size_set(_video_gengrid, height / 3, width / 2);
+   if (rotation == 90 || rotation == 270)
+      elm_gengrid_item_size_set(gengrid, height / 3, width / 2);
    else
-      elm_gengrid_item_size_set(_video_gengrid, width / 2, height / 4);
+      elm_gengrid_item_size_set(gengrid, width / 2, height / 4);
+}
+
+static void
+_win_rotation_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   video_picker_orient_set((Evas_Object *)data);
 }
 
 void
@@ -184,18 +214,10 @@ video_picker_open()
    evas_object_show(layout);
 
    Evas_Object *gengrid = elm_gengrid_add(layout);
-   _video_gengrid = gengrid;
    eext_object_event_callback_add(gengrid, EEXT_CALLBACK_BACK, _gengrid_back_cb, NULL);
    evas_object_smart_callback_add(gengrid, "longpressed", _gengrid_longpress_cb, NULL);
-
-   system_info_get_platform_int("http://tizen.org/feature/screen.width", &width);
-   system_info_get_platform_int("http://tizen.org/feature/screen.height", &height);
-   if (orientation == APP_DEVICE_ORIENTATION_90 ||
-       orientation == APP_DEVICE_ORIENTATION_270)
-      elm_gengrid_item_size_set(gengrid, height / 3, width / 2);
-   else
-      elm_gengrid_item_size_set(gengrid, width / 2, height / 4);
    elm_gengrid_align_set(gengrid, 0.0, 0.0);
+   video_picker_orient_set(gengrid);
 
    gic = elm_gengrid_item_class_new();
    gic->item_style = "type2";
@@ -234,4 +256,6 @@ video_picker_open()
    evas_object_smart_callback_add(btn, "clicked", _btn_done_cb, gengrid);
    elm_object_item_part_content_set(nf_it, "title_right_btn", btn);
    elm_object_text_set(btn, "DONE");
+
+   evas_object_smart_callback_add(_win, "wm,rotation,changed", _win_rotation_cb, gengrid);
 }

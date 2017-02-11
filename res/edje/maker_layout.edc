@@ -1,0 +1,267 @@
+collections {
+   base_scale: 2.6;
+   group { "main";
+      images {
+         image: "ic_video_add.png" COMP;
+         image: "ic_camera.png" COMP;
+         image: "img_button_press.png" COMP;
+      }
+      sounds {
+         sample {
+            name: "touch_sound" AS_IS;
+            source: "button.wav";
+         } 
+      }
+      parts {
+         part { name: "bg";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               color: 60 185 203 255;
+            }
+         }
+         part { name: "video2gif_event";
+            scale: 1;
+            description { state: "default" 0.0;
+               image {
+                  normal: "img_button_press.png";
+                  border: 30 30 30 30;
+               }
+               rel1 {
+                  relative: 0.5 0.5;
+                  to: "video2gif_block";
+               }
+               rel2 {
+                  relative: 0.5 0.5;
+                  to: "video2gif_block";
+               }
+               color: 0 0 0 0;
+               min: 400 336;
+            }
+            description { state: "show" 0.0;
+               inherit: "default" 0.0;
+               color: 0 0 0 100;
+               min: 440 370;
+            }
+            description { state: "hide" 0.0;
+               inherit: "show" 0.0;
+               color: 0 0 0 0;
+            }
+         }
+         part { name: "video2gif";
+            scale: 1;
+            description { state: "default" 0.0;
+               image.normal: "ic_video_add.png";
+               rel1 {
+                  relative: 0.5 0.25;
+               }
+               rel2 {
+                  relative: 0.5 0.25;
+               }
+               min: 300 224;
+            }
+         }
+         part { name: "video2gif_text";
+            type: TEXT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.0 1.0;
+                  to: "video2gif";
+                  offset: 0 10;
+               }
+               rel2 {
+                  to: "video2gif";
+                  offset: 0 10;
+               }
+               text {
+                  text: "Video to GIF";
+                  size: 45;
+                  ellipsis: -1;
+                  min: 1 0;
+                  align: 0.5 0.0;
+               }
+            }
+         }
+         part { name: "video2gif_block";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.5 0.66;
+                  to: "video2gif";
+               }
+               rel2 {
+                  relative: 0.5 0.66;
+                  to: "video2gif";
+               }
+               color: 0 0 0 0;
+               min: 440 370;
+            }
+         }
+         part { name: "gifcamera_event";
+            scale: 1;
+            description { state: "default" 0.0;
+               image {
+                  normal: "img_button_press.png";
+                  border: 30 30 30 30;
+               }
+               rel1 {
+                  relative: 0.5 0.5;
+                  to: "gifcamera_block";
+               }
+               rel2 {
+                  relative: 0.5 0.5;
+                  to: "gifcamera_block";
+               }
+               color: 0 0 0 0;
+               min: 400 336;
+            }
+            description { state: "show" 0.0;
+               inherit: "default" 0.0;
+               color: 0 0 0 100;
+               min: 440 370;
+            }
+            description { state: "hide" 0.0;
+               inherit: "show" 0.0;
+               color: 0 0 0 0;
+            }
+         }
+         part { name: "gifcamera";
+            scale: 1;
+            description { state: "default" 0.0;
+               image.normal: "ic_camera.png";
+               rel1 {
+                  relative: 0.5 0.67;
+               }
+               rel2 {
+                  relative: 0.5 0.67;
+               }
+               min: 300 224;
+            }
+         }
+         part { name: "gifcamera_text";
+            type: TEXT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.0 1.0;
+                  to: "gifcamera";
+                  offset: 0 10;
+               }
+               rel2 {
+                  to: "gifcamera";
+                  offset: 0 10;
+               }
+               text {
+                  text: "GIF Camera";
+                  size: 45;
+                  ellipsis: -1;
+                  min: 1 0;
+                  align: 0.5 0.0;
+               }
+            }
+         }
+         part { name: "gifcamera_block";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.5 0.66;
+                  to: "gifcamera";
+               }
+               rel2 {
+                  relative: 0.5 0.66;
+                  to: "gifcamera";
+               }
+               color: 0 0 0 0;
+               min: 440 370;
+            }
+         }
+      }
+      programs {
+         program {
+            signal: "mouse,down,*";
+            source: "video2gif_block";
+            action: STATE_SET "show" 0.0;
+            target: "video2gif_event";
+            transition: SINUSOIDAL 0.1;
+         }
+         program {
+            signal: "mouse,up,*";
+            source: "video2gif_block";
+            action: STATE_SET "hide" 0.0;
+            target: "video2gif_event";
+            transition: LINEAR 0.3;
+            after: "video2gif_default";
+
+         }
+         program { name: "video2gif_default";
+            action: STATE_SET "default" 0.0;
+            target: "video2gif_event";
+
+         }
+         program { 
+            signal: "mouse,clicked,*";
+            source: "video2gif_block";
+            script {
+               //play_sample("touch_sound", 1.0);
+               emit("button,video2gif", "");
+            }
+         }
+         program {
+            signal: "mouse,down,*";
+            source: "gifcamera_block";
+            action: STATE_SET "show" 0.0;
+            target: "gifcamera_event";
+            transition: SINUSOIDAL 0.1;
+         }
+         program {
+            signal: "mouse,up,*";
+            source: "gifcamera_block";
+            action: STATE_SET "hide" 0.0;
+            target: "gifcamera_event";
+            transition: LINEAR 0.3;
+            after: "gifcamera_default";
+         }
+         program { name: "gifcamera_default";
+            action: STATE_SET "default" 0.0;
+            target: "gifcamera_event";
+         }
+
+         program {
+            signal: "mouse,clicked,*";
+            source: "gifcamera_block";
+            script {
+               //play_sample("touch_sound", 1.0);
+               emit("button,gifcamera", "");
+            }
+         }
+      }
+   }
+   group { name: "rotation";
+      inherit: "main";
+      parts {
+         part { name: "video2gif";
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.25 0.4;
+               }
+               rel2 {
+                  relative: 0.25 0.4;
+               }
+            }
+         }
+         part { name: "gifcamera";
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.75 0.4;
+               }
+               rel2 {
+                  relative: 0.75 0.4;
+               }
+            }
+         }
+      }
+   }
+}

@@ -2,8 +2,7 @@
 #include <view.h>
 #include <util.h>
 
-Evas_Object *_main_naviframe, *_main_layout;
-app_device_orientation_e orientation;
+Evas_Object *_main_naviframe, *_main_layout, *_win;
 
 static void
 win_delete_request_cb(void *data, Evas_Object *obj, void *event_info)
@@ -29,6 +28,7 @@ create_base_gui()
    char *img_path;
 
 	Evas_Object *win = elm_win_util_standard_add(PACKAGE, PACKAGE);
+	_win = win;
 	elm_win_conformant_set(win, EINA_TRUE);
 	elm_win_autodel_set(win, EINA_TRUE);
 
@@ -143,10 +143,6 @@ ui_app_lang_changed(app_event_info_h event_info, void *user_data)
 static void
 ui_app_orient_changed(app_event_info_h event_info, void *user_data)
 {
-   app_event_get_device_orientation(event_info, &orientation);
-   viewer_orient_set();
-   video_picker_orient_set();
-
 	return;
 }
 
