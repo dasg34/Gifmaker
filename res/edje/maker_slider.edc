@@ -1,4 +1,4 @@
-#define POINT_WIDTH 3
+#define POINT_WIDTH 20
 #define POINT_SIZE 25
 
 collections {
@@ -6,6 +6,7 @@ collections {
    images {
       image: "img_slider_bg.png" COMP;
       image: "ic_point.png" COMP;
+      image: "ic_bar.png" COMP;
    }
    group { name: "main";
       parts {
@@ -37,7 +38,7 @@ collections {
             description { state: "default" 0.0;
                rel2.relative: 0.0 1.0;
                align: 0 0;
-               min: 35 0;
+               min: 80 0;
             }
          }
          part { name: "padding.right";
@@ -46,7 +47,7 @@ collections {
             description { state: "default" 0.0;
                rel1.relative: 1.0 0.0;
                align: 1 0;
-               min: 35 0;
+               min: 80 0;
             }
          }
          part { name: "slider";
@@ -89,7 +90,7 @@ collections {
                   to: "slider";
                }
                rel2 {
-                  relative: 0.0 0.74;
+                  relative: 1.0 0.74;
                   to_x: "start_bar";
                   to_y: "slider";
                }
@@ -114,23 +115,24 @@ collections {
          }
 
          part { name: "start_bar";
-            type: RECT;
             scale: 1;
             description { state: "default" 0.0;
+               image.normal: "ic_bar.png";
                rel1 {
                   relative: 0 0;
                   to_x: "start_drag_point";
                   to_y: "dragspace";
-                  offset: 0 -POINT_SIZE/2;
+                  offset: 0 -POINT_WIDTH/2;
                }
                rel2 {
                   relative: 0 1;
                   to_x: "start_drag_point";
                   to_y: "dragspace";
+                  offset: 0 POINT_WIDTH/2;
                }
                min: POINT_WIDTH 0;
-               align: 1 0.0;
-               color: 188 3 31 255;
+               align: 1.0 0.0;
+               color: 28 70 177 255;
             }
             description { state: "fixed" 0.0;
                inherit: "default" 0.0;
@@ -141,9 +143,11 @@ collections {
                rel2 {
                   relative: 0 1;
                   to: "end_bar";
+                  offset: 0 0;
                }
             }
          }
+         /*
          part { name: "start_point";
             scale: 1;
             description { state: "default" 0.0;
@@ -161,24 +165,26 @@ collections {
                color: 188 3 31 255;
             }
          }
+         */
          part { name: "end_bar";
-            type: RECT;
             scale: 1;
             description { state: "default" 0.0;
+               image.normal: "ic_bar.png";
                rel1 {
                   relative: 1.0 0.0;
                   to_x: "end_drag_point";
                   to_y: "dragspace";
-                  offset: 0 -POINT_SIZE/2;
+                  offset: 0 -POINT_WIDTH/2;
                }
                rel2 {
                   relative: 1.0 1.0;
                   to_x: "end_drag_point";
                   to_y: "dragspace";
+                  offset: 0 POINT_WIDTH/2;
                }
                min: POINT_WIDTH 0;
                align: 0.0 0.0;
-               color: 91 221 55 255;
+               color: 28 70 177 255;
             }
             description { state: "fixed" 0.0;
                inherit: "default" 0.0;
@@ -189,9 +195,11 @@ collections {
                }
                rel2 {
                   to: "start_bar";
+                  offset: 0 0;
                }
             }
          }
+         /*
          part { name: "end_point";
             scale: 1;
             description { state: "default" 0.0;
@@ -209,6 +217,7 @@ collections {
                color: 91 221 55 255;
             }
          }
+         */
          part { name: "start_drag_point";
             type: RECT;
             scale: 1;
@@ -241,15 +250,18 @@ collections {
             }
             description { state: "default" 0.0;
                rel1 {
-                  relative: 0.5 0.5;
-                  to: "start_point";
+                  relative: 0.9 0.5;
+                  to: "start_bar";
+                  offset: 0 -POINT_WIDTH*2;
                }
                rel2 {
-                  relative: 0.5 0.5;
-                  to: "start_point";
+                  relative: 0.9 0.5;
+                  to: "start_bar";
+                  offset: 0 POINT_WIDTH*2;
                }
-               min: POINT_SIZE*2 POINT_SIZE*2;
+               min: POINT_WIDTH*4 POINT_WIDTH*2;
                color: 0 0 0 0;
+               align: 1.0 0.5;
             }
          }
          part { name: "end_drag_block";
@@ -260,17 +272,21 @@ collections {
             }
             description { state: "default" 0.0;
                rel1 {
-                  relative: 0.5 0.5;
-                  to: "end_point";
+                  relative: 0.1 0.5;
+                  to: "end_bar";
+                  offset: 0 -POINT_WIDTH*2;
                }
                rel2 {
-                  relative: 0.5 0.5;
-                  to: "end_point";
+                  relative: 0.1 0.5;
+                  to: "end_bar";
+                  offset: 0 POINT_WIDTH*2;
                }
-               min: POINT_SIZE*2 POINT_SIZE*2;
+               min: POINT_WIDTH*4 POINT_WIDTH*2;
                color: 0 0 0 0;
+               align: 0.0 0.5;
             }
          }
+         /*
          part { name: "start_point_big";
             scale: 1;
             description { state: "default" 0.0;
@@ -311,8 +327,10 @@ collections {
                min: POINT_SIZE*2 POINT_SIZE*2;
             }
          }
+         */
       }
       programs {
+         /*
          program { 
             signal: "mouse,down,*";
             source: "start_drag_point";
@@ -341,6 +359,7 @@ collections {
             target: "end_point_big";
             transition: LINEAR 0.2;
          }
+         */
          program { 
             signal: "drag";
             source: "start_drag_point";
