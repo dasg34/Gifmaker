@@ -21,12 +21,12 @@ typedef struct _v_data {
 } v_data;
 
 static player_h player;
-static Evas_Object *_main_slider, *_slider_layout, *_popup, *_bottom_layout;
+static Evas_Object *_main_slider, *_slider_layout, *_popup, *_bottom_layout, *_setting_layout;
 static Ecore_Timer *_slider_timer;
 static double _start_value, _end_value = 999999;
 static Eina_Bool drag_start;
 
-static int fps = 15;
+static int _total_frame;
 static char **argv;
 static PixelWand *background;
 static Eina_Lock mutex;
@@ -54,7 +54,7 @@ _popup_btn_clicked_cb(void *data, Evas_Object *obj, void *event_info)
 }
 
 static void
-_popup_fail_open()
+_popup_fail_open(char *text)
 {
    Evas_Object *popup;
    Evas_Object *btn1;
@@ -63,8 +63,8 @@ _popup_fail_open()
    popup = elm_popup_add(_main_naviframe);
    elm_popup_align_set(popup, ELM_NOTIFY_ALIGN_FILL, 1.0);
    eext_object_event_callback_add(popup, EEXT_CALLBACK_BACK, eext_popup_back_cb, NULL);
-   elm_object_part_text_set(popup, "title,text", "Fail");
-   elm_object_text_set(popup,"Please try again");
+   elm_object_part_text_set(popup, "title,text", "Error");
+   elm_object_text_set(popup, text);
 
    /* ok button */
    btn1 = elm_button_add(popup);
@@ -79,23 +79,20 @@ static void
 _popup_progress_increase()
 {
    char text[128];
-   int total_frame;
    Evas_Object *layout, *progressbar;
 
    dlog_print(DLOG_ERROR, LOG_TAG, "frame : %d", frame);
    layout = evas_object_data_get(_popup, "layout");
    progressbar = evas_object_data_get(_popup, "progressbar");
 
-   preference_get_int("total_frame", &total_frame);
-
-   snprintf(text, sizeof(text), "%d/%d", frame, total_frame);
-   if (frame >= total_frame)
+   snprintf(text, sizeof(text), "%d/%d", frame, _total_frame);
+   if (frame >= _total_frame)
       snprintf(text, sizeof(text), "finalization");
    if (thread_cancel)
       snprintf(text, sizeof(text), "Wait...");
 
    elm_object_part_text_set(layout, "elm.text.description", text);
-   elm_progressbar_value_set(progressbar, frame / (double)total_frame);
+   elm_progressbar_value_set(progressbar, frame / (double)_total_frame);
 
    frame++;
 }
@@ -235,11 +232,14 @@ _layout_cb_start_point_drag(void *data, Evas_Object *obj, const char *emission, 
    edje_object_part_geometry_get(elm_layout_edje_get(obj), "start_clipper", NULL, NULL, &geo, NULL);
    elm_slider_min_max_get(_main_slider, NULL, &max_value);
 
-   value = (geo * max_value) / (double)(w - ELM_SCALE_SIZE(11));
+   value = (geo * max_value) / (double)(w - ELM_SCALE_SIZE(9));
    elm_slider_value_set(_main_slider, value);
    player_set_play_position(player, value, false, NULL, NULL);
 
-   snprintf(text, sizeof(text), "%.3lf", value / 1000);
+   if (value > _end_value)
+      snprintf(text, sizeof(text), "%.3lf", _end_value / 1000);
+   else
+      snprintf(text, sizeof(text), "%.3lf", value / 1000);
    elm_object_part_text_set(_bottom_layout, "start_text", text);
 }
 
@@ -254,7 +254,7 @@ _layout_cb_start_point_drag_stop(void *data, Evas_Object *obj, const char *emiss
    edje_object_part_geometry_get(elm_layout_edje_get(obj), "start_clipper", NULL, NULL, &geo, NULL);
    elm_slider_min_max_get(_main_slider, NULL, &max_value);
 
-   *value = (geo * max_value) / (double)(w - ELM_SCALE_SIZE(11));
+   *value = (geo * max_value) / (double)(w - ELM_SCALE_SIZE(9));
    _start_value = *value;
 
    if (player_set_play_position(player, *value, true, NULL, NULL) != PLAYER_ERROR_NONE)
@@ -272,15 +272,18 @@ _layout_cb_end_point_drag(void *data, Evas_Object *obj, const char *emission, co
    edje_object_part_geometry_get(elm_layout_edje_get(obj), "start_clipper", NULL, NULL, &geo, NULL);
    elm_slider_min_max_get(_main_slider, NULL, &max_value);
 
-   value = (geo * max_value) / (double)(w - ELM_SCALE_SIZE(11));
+   value = (geo * max_value) / (double)(w - ELM_SCALE_SIZE(9));
    elm_slider_value_set(_main_slider, value);
    player_set_play_position(player, value, true, NULL, NULL);
 
    edje_object_part_geometry_get(elm_layout_edje_get(obj), "end_clipper", NULL, NULL, &geo, NULL);
-   value = (geo * max_value) / (double)(w - ELM_SCALE_SIZE(11));
+   value = (geo * max_value) / (double)(w - ELM_SCALE_SIZE(9));
    _end_value = max_value - value;
 
-   snprintf(text, sizeof(text), "%.3lf", _end_value / 1000);
+   if (_start_value > _end_value)
+      snprintf(text, sizeof(text), "%.3lf", _start_value / 1000);
+   else
+      snprintf(text, sizeof(text), "%.3lf", _end_value / 1000);
    elm_object_part_text_set(_bottom_layout, "end_text", text);
 }
 
@@ -354,17 +357,23 @@ _thread_start(void *_data, Ecore_Thread *thread)
    char gif_path[PATH_MAX];
    unsigned int jpeg_size;
    unsigned char *jpeg_data;
+   int width, height;
+
+   preference_get_int("width", &width);
+   preference_get_int("height", &height);
 
    snprintf(gif_path, sizeof(gif_path), "%s%s_%d.gif", app_get_data_path(), "test", vdata->file_num);
    argv[vdata->file_num] = strdup(gif_path);
    dlog_print(DLOG_ERROR, LOG_TAG, "gif_path : %s", gif_path);
+   dlog_print(DLOG_ERROR, LOG_TAG, "width : %d", width);
+   dlog_print(DLOG_ERROR, LOG_TAG, "height : %d", height);
    image_util_encode_jpeg_to_memory(vdata->data, vdata->width, vdata->height, IMAGE_UTIL_COLORSPACE_RGB888, 100, &jpeg_data, &jpeg_size);
    free(vdata->data);
 
    sw = NewMagickWand();
    MagickReadImageBlob(sw, jpeg_data, jpeg_size);
    free(jpeg_data);
-   MagickResizeImage(sw, vdata->width / 2, vdata->height / 2, Lanczos2SharpFilter);
+   MagickResizeImage(sw, width, height, Lanczos2SharpFilter);
 
    if (vdata->rotate)
          MagickRotateImage(sw, background, vdata->rotate);
@@ -392,7 +401,7 @@ _thread_cb_start(void *_path, Ecore_Thread *thread)
 
    void *data;
    char *temp_value;
-   int total_frame, data_size, width, height, rotate = 0, file_num = 0;
+   int total_frame, data_size, width, height, rotate = 0, file_num = 0, fps;
    MagickWand *mw, *sw;
    metadata_extractor_h metadata_h;
 
@@ -408,17 +417,18 @@ _thread_cb_start(void *_path, Ecore_Thread *thread)
    metadata_extractor_get_metadata(metadata_h, METADATA_ROTATE, &temp_value);
    if (temp_value)
       rotate = atoi(temp_value);
-   metadata_extractor_get_metadata(metadata_h, METADATA_VIDEO_WIDTH, &temp_value);
-   width = atoi(temp_value);
-   metadata_extractor_get_metadata(metadata_h, METADATA_VIDEO_HEIGHT, &temp_value);
-   height = atoi(temp_value);
+
+   player_get_video_size(player, &width, &height);
+
    dlog_print(DLOG_ERROR, LOG_TAG, "_end_value : %lf", _end_value);
    dlog_print(DLOG_ERROR, LOG_TAG, "width : %d", width);
    dlog_print(DLOG_ERROR, LOG_TAG, "height : %d", height);
    dlog_print(DLOG_ERROR, LOG_TAG, "rotate : %d", rotate);
 
+   preference_get_int("fps", &fps);
+
    total_frame = ((_end_value - _start_value) * fps) / 1000;
-   preference_set_int("total_frame", total_frame);
+   _total_frame = total_frame;
    argv = (char**)malloc(sizeof(char*) * (total_frame + 2));
 
    for (int i = _start_value; i <= _end_value; i += 1000. / fps)
@@ -453,7 +463,7 @@ _thread_cb_start(void *_path, Ecore_Thread *thread)
    if (file_num <= 0)
       {
          ecore_thread_main_loop_begin();
-         _popup_fail_open();
+         _popup_fail_open("Please try again");
          ecore_thread_main_loop_end();
          return;
       }
@@ -521,6 +531,57 @@ _btn_cb_make(void *data, Evas_Object *obj, const char *emission, const char *sou
    _popup_progressbar_show();
 }
 
+
+static void
+_settings_cb_hide_done(void *data, Evas_Object *obj, const char *emission, const char *source)
+{
+   evas_object_hide(_setting_layout);
+   elm_layout_signal_callback_del(_setting_layout, "settings,hide,done", "", _settings_cb_hide_done);
+}
+
+static void
+_setting_back_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   elm_layout_signal_callback_add(_setting_layout, "settings,hide,done", "", _settings_cb_hide_done, NULL);
+   elm_layout_signal_emit(_setting_layout, "settings,hide", "");
+   elm_layout_signal_emit(_bottom_layout, "settings,hide", "");
+}
+
+static void
+_settings_toggle()
+{
+   if (evas_object_visible_get(_setting_layout))
+      {
+         elm_layout_signal_callback_add(_setting_layout, "settings,hide,done", "", _settings_cb_hide_done, NULL);
+         elm_layout_signal_emit(_setting_layout, "settings,hide", "");
+         elm_layout_signal_emit(_bottom_layout, "settings,hide", "");
+      }
+   else
+      {
+         evas_object_show(_setting_layout);
+         elm_layout_signal_emit(_setting_layout, "settings,show", "");
+         elm_layout_signal_emit(_bottom_layout, "settings,show", "");
+      }
+}
+
+static void
+_settings_cb_hide_start(void *data, Evas_Object *obj, const char *emission, const char *source)
+{
+   _settings_toggle();
+}
+
+static void
+_btn_cb_settings(void *data, Evas_Object *obj, const char *emission, const char *source)
+{
+   _settings_toggle();
+}
+
+static void
+_setting_more_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   _settings_toggle();
+}
+
 static void
 _player_completed_cb(void *user_data)
 {
@@ -530,10 +591,55 @@ _player_completed_cb(void *user_data)
    _player_pause();
 }
 
+static void
+_slider_cb_fps(void *data, Evas_Object *obj, void *event_info)
+{
+   Evas_Object *layout = data;
+   double value;
+   char text[128];
+   int width, height;
+
+   value = elm_slider_value_get(obj);
+   snprintf(text, sizeof(text), "%d fps", (int)value);
+   elm_object_part_text_set(layout, "fps_text", text);
+   preference_set_int("fps", (int)value);
+
+   preference_get_int("width", &width);
+   preference_get_int("height", &height);
+   snprintf(text, sizeof(text), "%d x %d, %.0lffps", width, height, value);
+   elm_object_part_text_set(_bottom_layout, "settings_text", text);
+}
+
+static void
+_slider_cb_resolution(void *data, Evas_Object *obj, void *event_info)
+{
+   Evas_Object *layout = data;
+   double value, rate;
+   char text[128];
+   int fps, width, height;
+
+   value = elm_slider_value_get(obj);
+   preference_get_double("rate", &rate);
+
+   value -= (int)value % 10;
+   preference_set_int("width", (int)(value * rate + 1) - (int)(value * rate + 1) % 10);
+   preference_set_int("height", value);
+
+   preference_get_int("fps", &fps);
+   preference_get_int("width", &width);
+   preference_get_int("height", &height);
+
+   snprintf(text, sizeof(text), "%d x %dpx", width, height);
+   elm_object_part_text_set(layout, "resolution_text", text);
+
+   snprintf(text, sizeof(text), "%d x %d, %dfps", width, height, fps);
+   elm_object_part_text_set(_bottom_layout, "settings_text", text);
+}
+
 void
 gif_maker_open(char *path)
 {
-   char text[10];
+   char text[128];
    int duration;
    _start_value = 0;
    drag_start = EINA_FALSE;
@@ -554,7 +660,12 @@ gif_maker_open(char *path)
    player_create(&player);
    player_set_uri(player, path);
    player_set_display(player, PLAYER_DISPLAY_TYPE_EVAS, GET_DISPLAY(rect));
-   player_prepare(player);
+   int ret = player_prepare(player);
+   if (ret == PLAYER_ERROR_NOT_SUPPORTED_FILE)
+      {
+         _popup_fail_open("Not supported file!");
+         return;
+      }
    player_set_completed_cb(player, _player_completed_cb, NULL);
    player_start(player);
    player_pause(player);
@@ -566,6 +677,7 @@ gif_maker_open(char *path)
 
    Evas_Object *box = elm_box_add(table);
    eext_object_event_callback_add(box, EEXT_CALLBACK_BACK, _box_back_cb, NULL);
+   eext_object_event_callback_add(box, EEXT_CALLBACK_MORE, _setting_more_cb, NULL);
    evas_object_size_hint_weight_set(box, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(box, EVAS_HINT_FILL, EVAS_HINT_FILL);
    elm_table_pack(table, box, 0, 0, 1, 1);
@@ -587,12 +699,95 @@ gif_maker_open(char *path)
    evas_object_size_hint_align_set(bottom_layout, EVAS_HINT_FILL, EVAS_HINT_FILL);
    elm_layout_signal_callback_add(bottom_layout, "button,play", "", _btn_cb_play, NULL);
    elm_layout_signal_callback_add(bottom_layout, "button,make", "", _btn_cb_make, path);
+   elm_layout_signal_callback_add(bottom_layout, "button,settings", "", _btn_cb_settings, NULL);
    snprintf(text, sizeof(text), "%.3lf", _start_value / 1000);
    elm_object_part_text_set(_bottom_layout, "start_text", text);
    snprintf(text, sizeof(text), "%.3lf", _end_value / 1000);
    elm_object_part_text_set(_bottom_layout, "end_text", text);
    evas_object_show(bottom_layout);
    elm_box_pack_end(box, bottom_layout);
+
+   Evas_Object *setting_layout = my_layout_add(table, "edje/setting_layout.edj", "main");
+   _setting_layout = setting_layout;
+   evas_object_size_hint_weight_set(setting_layout, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(setting_layout, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   eext_object_event_callback_add(setting_layout, EEXT_CALLBACK_MORE, _setting_more_cb, NULL);
+   eext_object_event_callback_add(setting_layout, EEXT_CALLBACK_BACK, _setting_back_cb, NULL);
+   elm_layout_signal_callback_add(setting_layout, "settings,hide,start", "", _settings_cb_hide_start, NULL);
+   elm_table_pack(table, setting_layout, 0, 0, 1, 1);
+   evas_object_hide(setting_layout);
+
+   Evas_Object *setting_obj = my_layout_add(setting_layout, "edje/settings.edj", "main");
+   evas_object_size_hint_weight_set(setting_obj, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(setting_obj, EVAS_HINT_FILL, 1.0);
+   elm_object_part_content_set(setting_layout, "layout", setting_obj);
+
+   //fps setting
+   int fps = -1;
+
+   preference_get_int("fps", &fps);
+   if (fps < 0)
+      {
+         fps = 15;
+         preference_set_int("fps", fps);
+      }
+
+   Evas_Object *fps_slider = elm_slider_add(setting_obj);
+   elm_slider_min_max_set(fps_slider, 1, 15);
+   elm_slider_step_set(fps_slider, 1.0);
+   elm_slider_value_set(fps_slider, fps);
+   elm_object_part_content_set(setting_obj, "fps_slider", fps_slider);
+   evas_object_smart_callback_add(fps_slider, "changed", _slider_cb_fps, setting_obj);
+   snprintf(text, sizeof(text), "%d fps", fps);
+   elm_object_part_text_set(setting_obj, "fps_text", text);
+
+   //calculate resolution
+   int width, height;
+   double rate;
+   char *temp_value;
+   int rotate = 0;
+   metadata_extractor_h metadata_h;
+
+   metadata_extractor_create(&metadata_h);
+   metadata_extractor_set_path(metadata_h, path);
+
+   metadata_extractor_get_metadata(metadata_h, METADATA_ROTATE, &temp_value);
+   metadata_extractor_destroy(metadata_h);
+   if (temp_value)
+      rotate = atoi(temp_value);
+
+   player_get_video_size(player, &width, &height);
+   dlog_print(DLOG_ERROR, LOG_TAG, "width : %d", width);
+   dlog_print(DLOG_ERROR, LOG_TAG, "height : %d", height);
+   dlog_print(DLOG_ERROR, LOG_TAG, "rotate : %d", rotate);
+   rate = (double)width / height;
+   if (width > 680)
+      {
+         width = 680;
+         height = width * (1. / rate);
+      }
+
+   width -= width % 10;
+   height -= height % 10;
+   if (rotate == 90)
+      snprintf(text, sizeof(text), "%d x %d, %dfps", height, width, fps);
+   else
+      snprintf(text, sizeof(text), "%d x %d, %dfps", width, height, fps);
+
+   elm_object_part_text_set(_bottom_layout, "settings_text", text);
+
+   preference_set_int("width", width);
+   preference_set_int("height", height);
+   preference_set_double("rate", rate);
+
+   Evas_Object *resolution_slider = elm_slider_add(setting_obj);
+   elm_slider_min_max_set(resolution_slider, 10, width < height ? width : height);
+   elm_slider_step_set(resolution_slider, 10.0);
+   elm_slider_value_set(resolution_slider, width < height ? width : height);
+   evas_object_smart_callback_add(resolution_slider, "changed", _slider_cb_resolution, setting_obj);
+   elm_object_part_content_set(setting_obj, "resolution_slider", resolution_slider);
+   snprintf(text, sizeof(text), "%dx%d px", width, height);
+   elm_object_part_text_set(setting_obj, "resolution_text", text);
 
    elm_naviframe_item_simple_push(_main_naviframe, table);
 }

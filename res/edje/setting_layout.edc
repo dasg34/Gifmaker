@@ -1,0 +1,88 @@
+collections {
+   base_scale: 2.6;
+   group { name: "main";
+      parts {
+         part { name: "bg";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               color: 0 0 0 0;
+               rel2 {
+                  relative: 1.0 0.0;
+                  to: "layout";
+               }
+            }
+         }
+         part { name: "padding";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1.relative: 0.0 1.0;
+               rel2.relative: 1.0 1.0;
+               min: 0 130;
+               align: 0.5 1.0;
+            }
+         }
+         part { name: "clipper";
+            type: RECT;
+            description { state: "default" 0.0;
+               rel1.to: "layout";
+               rel2.to: "layout";
+               color: 255 255 255 0;
+            }
+            description { state: "show" 0.0;
+               inherit: "default" 0.0;
+               color: 255 255 255 255;
+            }
+         }
+         part { name: "layout";
+            type: SWALLOW;
+            scale: 1;
+            clip_to: "clipper";
+            description { state: "default" 0.0;
+               rel1.relative: 0.0 1.0;
+               rel2.relative: 1.0 1.0;
+               min: 0 200;
+               align: 0.5 1.0;
+            }
+            description { state: "show" 0.0;
+               inherit: "default" 0.0;
+               rel1 {
+                  to: "padding";
+               }
+               rel2 {
+                  relative: 1.0 0.0;
+                  to: "padding";
+               }
+            }
+         }
+      }
+      programs {
+         program {
+            signal: "settings,show";
+            source: "";
+            action: STATE_SET "show" 0.0;
+            target: "layout";
+            target: "clipper";
+            transition: LINEAR 0.15;
+         }
+         program {
+            signal: "settings,hide";
+            source: "";
+            action: STATE_SET "default" 0.0;
+            target: "layout";
+            target: "clipper";
+            transition: LINEAR 0.15;
+            after: "settings_hide_done";
+         }
+         program { name: "settings_hide_done";
+            action: SIGNAL_EMIT "settings,hide,done" "";
+         }
+         program {
+            signal: "mouse,clicked,*";
+            source: "bg";
+            action: SIGNAL_EMIT "settings,hide,start" "";
+         }
+      }
+   }
+}

@@ -1,0 +1,277 @@
+#define FONT_SIZE 32
+collections {
+   base_scale: 2.6;
+   group { name: "main";
+      parts {
+         part { name: "bg";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               min: 0 200;
+            }
+         }
+         part { name: "space_middle";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to_x: "resolution_title";
+                  to_y: "bg";
+               }
+               rel2 {
+                  relative: 1.0 1.0;
+                  to_x: "resolution_title";
+                  to_y: "bg";
+               }
+               min: 40 0;
+               align: 0.0 0.5;
+            }
+         }
+         part { name: "space_left";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  to: "bg";
+               }
+               rel2 {
+                  relative: 0.0 1.0;
+                  to: "bg";
+               }
+               min: 20 0;
+               align: 0.0 0.0;
+            }
+         }
+         part { name: "space_top";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  to: "bg";
+               }
+               rel2 {
+                  relative: 1.0 0.0;
+                  to: "bg";
+               }
+               min: 0 10;
+               align: 0.0 0.0;
+            }
+         }
+         part { name: "space_right";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to: "bg";
+               }
+               rel2 {
+                  to: "bg";
+               }
+               min: 40 0;
+               align: 1.0 0.0;
+            }
+         }
+         part { name: "space_bottom";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.0 1.0;
+                  to_x: "space_left";
+                  to_y: "resolution_text";
+               }
+               rel2 {
+                  relative: 1.0 1.0;
+                  to_x: "space_right";
+                  to_y: "resolution_text";
+               }
+               min: 0 20;
+               align: 1.0 0.0;
+            }
+         }
+         part { name: "fps_title";
+            type: TEXT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 1.0;
+                  to_x: "space_left";
+                  to_y: "space_top";
+               }
+               rel2 {
+                  relative: 1.0 1.0;
+                  to_x: "space_left";
+                  to_y: "space_top";
+               }
+               text {
+                  text: "FPS";
+                  size: FONT_SIZE;
+                  ellipsis: -1;
+                  min: 1 1;
+                  align: 0.0 0.0;
+               }
+               align: 0.0 0.0;
+               color: 0 0 0 255;
+            }
+         }
+         part { name: "fps_text";
+            type: TEXT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.0 1.0;
+                  to: "fps_title";
+               }
+               rel2 {
+                  relative: 0.0 1.0;
+                  to: "fps_title";
+               }
+               text {
+                  text: "15 fps";
+                  size: FONT_SIZE-4;
+                  ellipsis: -1;
+                  min: 1 1;
+                  align: 0.0 0.0;
+               }
+               align: 0.0 0.0;
+               color: 0 0 0 255;
+            }
+         }
+         part { name: "fps_slider";
+            type: SWALLOW;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to_x: "space_middle";
+                  to_y: "fps_title";
+               }
+               rel2 {
+                  relative: 0.0 1.0;
+                  to_x: "space_right";
+                  to_y: "fps_text";
+               }
+               align: 0.0 0.0;
+            }
+         }
+         part { name: "sperator";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.0 0.5;
+                  to: "space_middle2";
+               }
+               rel2 {
+                  relative: 1.0 0.5;
+                  to: "space_middle2";
+               }
+               min: 0 2;
+               color: 200 200 200 255;
+            }
+         }
+         part { name: "space_middle2";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.0 1.0;
+                  to_y: "fps_text";
+               }
+               rel2 {
+                  to_y: "fps_text";
+               }
+               min: 0 20;
+               align: 0 0;
+            }
+         }
+         part { name: "resolution_title";
+            type: TEXT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 1.0;
+                  to_x: "space_left";
+                  to_y: "space_middle2";
+               }
+               rel2 {
+                  relative: 1.0 1.0;
+                  to_x: "space_left";
+                  to_y: "space_middle2";
+               }
+               text {
+                  text: "Resolution";
+                  size: FONT_SIZE;
+                  ellipsis: -1;
+                  min: 1 1;
+                  align: 0 0;
+               }
+               align: 0 0;
+               color: 0 0 0 255;
+            }
+         }
+         part { name: "resolution_text";
+            type: TEXT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.0 1.0;
+                  to: "resolution_title";
+               }
+               rel2 {
+                  relative: 0.0 1.0;
+                  to: "resolution_title";
+               }
+               text {
+                  text: "680x480px";
+                  size: FONT_SIZE-4;
+                  ellipsis: -1;
+                  min: 1 1;
+                  align: 0 0;
+               }
+               align: 0 0;
+               color: 0 0 0 255;
+            }
+         }
+         part { name: "resolution_event";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  to: "resolution_title";
+               }
+               rel2 {
+                  to: "resolution_text";
+               }
+               color: 0 0 0 0;
+            }
+         }
+         part { name: "resolution_slider";
+            type: SWALLOW;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to_x: "space_middle";
+                  to_y: "resolution_title";
+               }
+               rel2 {
+                  relative: 0.0 1.0;
+                  to_x: "space_right";
+                  to_y: "resolution_text";
+               }
+               align: 0.0 0.0;
+            }
+         }
+      }
+      programs {
+         program {
+            signal: "mouse,clicked,*";
+            source: "resolution_event";
+            action: SIGNAL_EMIT "mouse,clicked,resolution" "";
+         }
+      }
+   }
+}

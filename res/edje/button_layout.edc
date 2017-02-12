@@ -7,6 +7,8 @@ collections {
          image: "ic_pause.png" COMP;
          image: "ic_setting.png" COMP;
          image: "ic_button_circle.png" COMP;
+         image: "ic_arrow.png" COMP;
+         image: "ic_arrow_r.png" COMP;
       }
       sounds {
          sample {
@@ -89,6 +91,10 @@ collections {
                inherit: "default";
                color: 66 66 66 180;
             }
+            description { state: "reverse" 0.0;
+               inherit: "default";
+               color: 66 66 66 180;
+            }
          }
          part { name: "clipper_right";
             type: RECT;
@@ -99,6 +105,10 @@ collections {
                color: 255 255 255 255;
             }
             description { state: "clicked" 0.0;
+               inherit: "default";
+               color: 66 66 66 180;
+            }
+            description { state: "reverse" 0.0;
                inherit: "default";
                color: 66 66 66 180;
             }
@@ -192,13 +202,13 @@ collections {
                   relative: 1.0 0.0;
                   to_x: "settings_icon";
                   to_y: "padding_bottom";
-                  offset: 3 0;
+                  offset: 5 0;
                }
                rel2 {
                   relative: 1.0 0.0;
                   to_x: "settings_icon";
                   to_y: "padding_bottom";
-                  offset: 3 0;
+                  offset: 5 0;
                }
                text {
                   text: "680 x 380, 15fps";
@@ -266,6 +276,80 @@ collections {
                align: 1.0 0.0;
             }
          }
+         part { name: "settings_arrow";
+            scale: 1;
+            description { state: "default" 0.0;
+               image.normal: "ic_arrow.png";
+               rel1 {
+                  relative: 0.5 0.2;
+                  to: "settings_event";
+               }
+               rel2 {
+                  relative: 0.5 0.2;
+                  to: "settings_event";
+               }
+               min: 70 35;
+               align: 0.5 0.0;
+            }
+            description { state: "reverse" 0.0;
+               inherit: "default" 0.0;
+               color: 255 255 255 0;
+            }
+         }
+         part { name: "settings_arrow_r";
+            scale: 1;
+            description { state: "default" 0.0;
+               image.normal: "ic_arrow_r.png";
+               rel1 {
+                  relative: 0.5 0.2;
+                  to: "settings_event";
+               }
+               rel2 {
+                  relative: 0.5 0.2;
+                  to: "settings_event";
+               }
+               align: 0.5 0.0;
+               min: 70 35;
+               color: 255 255 255 0;
+            }
+            description { state: "reverse" 0.0;
+               inherit: "default" 0.0;
+               color: 255 255 255 255;
+            }
+         }
+         part { name: "settings_event";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to_x: "padding_left";
+                  to_y: "padding_bottom";
+               }
+               rel2 {
+                  relative: 0.0 0.0;
+                  to_x: "play_button";
+                  to_y: "padding_bottom";
+               }
+               min: 0 100;
+               align: 0.5 1.0;
+               color: 0 0 0 0;
+            }
+         }
+         part { name: "button_blocker";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1.to: "play_button";
+               rel2.to: "make_button";
+               visible: 0;
+               color: 0 0 0 0;
+            }
+            description { state: "reverse" 0.0;
+               inherit: "default" 0.0;
+               visible: 1;
+            }
+         }
       }
       programs {
          program {
@@ -323,6 +407,31 @@ collections {
                //play_sample("touch_sound", 1.0);
                emit("button,make", "");
             }
+         }
+         program {
+            signal: "mouse,clicked,*";
+            source: "settings_event";
+            action: SIGNAL_EMIT "button,settings" "";
+         }
+         program { 
+            signal: "settings,show";
+            action: STATE_SET "reverse" 0.0;
+            target: "settings_arrow";
+            target: "settings_arrow_r";
+            target: "clipper_right";
+            target: "clipper_middle";
+            target: "button_blocker";
+            transition: LINEAR 0.1;
+         }
+         program { 
+            signal: "settings,hide";
+            action: STATE_SET "default" 0.0;
+            target: "settings_arrow";
+            target: "settings_arrow_r";
+            target: "clipper_right";
+            target: "clipper_middle";
+            target: "button_blocker";
+            transition: LINEAR 0.1;
          }
       }
    }

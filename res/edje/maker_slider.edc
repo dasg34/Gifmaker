@@ -1,5 +1,4 @@
-#define POINT_WIDTH 20
-#define POINT_SIZE 25
+#define POINT_WIDTH 13
 
 collections {
    base_scale: 2.6;
@@ -132,7 +131,8 @@ collections {
                }
                min: POINT_WIDTH 0;
                align: 1.0 0.0;
-               color: 28 70 177 255;
+               //color: 28 70 177 255;
+               color: 76 129 166 255;
             }
             description { state: "fixed" 0.0;
                inherit: "default" 0.0;
@@ -184,7 +184,8 @@ collections {
                }
                min: POINT_WIDTH 0;
                align: 0.0 0.0;
-               color: 28 70 177 255;
+               //color: 28 70 177 255;
+               color: 76 129 166 255;
             }
             description { state: "fixed" 0.0;
                inherit: "default" 0.0;
