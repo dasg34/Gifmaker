@@ -10,8 +10,6 @@
 #include <device/power.h>
 #include <app_preference.h>
 
-//FIXME: file name!
-
 typedef struct _v_data {
    int file_num;
    unsigned char *data;
@@ -51,6 +49,33 @@ _popup_btn_clicked_cb(void *data, Evas_Object *obj, void *event_info)
 {
    Evas_Object *popup = data;
    evas_object_del(popup);
+}
+
+static void
+popup_block_clicked_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   evas_object_del(obj);
+}
+
+static void
+popup_timeout_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   evas_object_del(obj);
+}
+
+static void
+_popup_toast_open(char *text)
+{
+   Evas_Object *popup = elm_popup_add(_main_naviframe);
+   elm_object_style_set(popup, "toast");
+   elm_popup_timeout_set(popup, 2.0);
+   elm_object_text_set(popup, text);
+   evas_object_size_hint_weight_set(popup, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   eext_object_event_callback_add(popup, EEXT_CALLBACK_BACK, eext_popup_back_cb, NULL);
+   evas_object_smart_callback_add(popup, "block,clicked", popup_block_clicked_cb, NULL);
+   evas_object_smart_callback_add(popup, "timeout", popup_timeout_cb, NULL);
+
+   evas_object_show(popup);
 }
 
 static void
@@ -400,7 +425,7 @@ _thread_cb_start(void *_path, Ecore_Thread *thread)
    char *path = _path;
 
    void *data;
-   char *temp_value;
+   char *temp_value, out_path[PATH_MAX], out_file[PATH_MAX];
    int total_frame, data_size, width, height, rotate = 0, file_num = 0, fps;
    MagickWand *mw, *sw;
    metadata_extractor_h metadata_h;
@@ -477,7 +502,7 @@ _thread_cb_start(void *_path, Ecore_Thread *thread)
       {
          sw = NewMagickWand();
          MagickReadImage(sw, argv[i]);
-         dlog_print(DLOG_INFO, LOG_TAG, "MagickReadImage %s",  argv[i]);
+         dlog_print(DLOG_INFO, LOG_TAG, "MagickReadImage %s", argv[i]);
          MagickSetImageDelay(sw, 100 / fps);
          MagickAddImage(mw,sw);
          DestroyMagickWand(sw);
@@ -489,20 +514,36 @@ _thread_cb_start(void *_path, Ecore_Thread *thread)
       }
    free(argv);
 
-   MagickWriteImages(mw, "/opt/usr/media/Images/test.gif", true);
+   time_t raw_time;
+   struct tm* time_info;
+
+   time(&raw_time);
+   time_info = localtime(&raw_time);
+   snprintf(out_file, sizeof(out_file), "gifmaker_%d%s%d%s%d_%s%d%s%d%s%d.gif", time_info->tm_year - 100,
+            time_info->tm_mon < 9 ? "0" : "", time_info->tm_mon + 1,
+            time_info->tm_mday < 10 ? "0" : "",  time_info->tm_mday,
+            time_info->tm_hour < 10 ? "0" : "",  time_info->tm_hour,
+            time_info->tm_min < 10 ? "0" : "",  time_info->tm_min,
+            time_info->tm_sec < 10 ? "0" : "",  time_info->tm_sec);
+
+   snprintf(out_path, sizeof(out_path), "/opt/usr/media/gifmaker/%s", out_file);
+   MagickWriteImages(mw, out_path, true);
    DestroyMagickWand(mw);
    MagickWandTerminus();
 
+   media_content_connect();
+   media_content_scan_file(out_path);
+   media_content_disconnect();
+
+   ecore_thread_main_loop_begin();
+   _popup_toast_open("Success!");
+   ecore_thread_main_loop_end();
 }
 
 static void
 _thread_cb_end(void *data, Ecore_Thread *thread)
 {
    device_power_release_lock(POWER_LOCK_DISPLAY);
-
-   media_content_connect();
-   media_content_scan_file("/opt/usr/media/Images/test.gif");
-   media_content_disconnect();
 
 
    dlog_print(DLOG_INFO, LOG_TAG, "end time : %u", time(NULL));
@@ -522,10 +563,12 @@ static void
 _btn_cb_make(void *data, Evas_Object *obj, const char *emission, const char *source)
 {
    char *path = data;
+   char cmd[1024];
 
    thread_cancel = EINA_FALSE;
    device_power_request_lock(POWER_LOCK_DISPLAY, 0);
-   dlog_print(DLOG_INFO, LOG_TAG, "start time : %u", time(NULL));
+   snprintf(cmd, sizeof(cmd), "exec rm -r %s/*", app_get_data_path());
+   system(cmd);
 
    _gif_maker_thread = ecore_thread_run(_thread_cb_start, _thread_cb_end, _thread_cb_cancel, strdup(path));
    _popup_progressbar_show();
@@ -617,6 +660,7 @@ _slider_cb_resolution(void *data, Evas_Object *obj, void *event_info)
    double value, rate;
    char text[128];
    int fps, width, height;
+   bool reverse_flag;
 
    value = elm_slider_value_get(obj);
    preference_get_double("rate", &rate);
@@ -628,11 +672,18 @@ _slider_cb_resolution(void *data, Evas_Object *obj, void *event_info)
    preference_get_int("fps", &fps);
    preference_get_int("width", &width);
    preference_get_int("height", &height);
+   preference_get_boolean("reverse_resol", &reverse_flag);
 
-   snprintf(text, sizeof(text), "%d x %dpx", width, height);
+   if (reverse_flag)
+      snprintf(text, sizeof(text), "%d x %dpx", height, width);
+   else
+      snprintf(text, sizeof(text), "%d x %dpx", width, height);
    elm_object_part_text_set(layout, "resolution_text", text);
 
-   snprintf(text, sizeof(text), "%d x %d, %dfps", width, height, fps);
+   if (reverse_flag)
+      snprintf(text, sizeof(text), "%d x %d, %dfps", height, width, fps);
+   else
+      snprintf(text, sizeof(text), "%d x %d, %dfps", width, height, fps);
    elm_object_part_text_set(_bottom_layout, "settings_text", text);
 }
 
@@ -770,11 +821,22 @@ gif_maker_open(char *path)
    width -= width % 10;
    height -= height % 10;
    if (rotate == 90)
-      snprintf(text, sizeof(text), "%d x %d, %dfps", height, width, fps);
+      {
+         preference_set_boolean("reverse_resol", true);
+         snprintf(text, sizeof(text), "%d x %d, %dfps", height, width, fps);
+      }
    else
-      snprintf(text, sizeof(text), "%d x %d, %dfps", width, height, fps);
-
+      {
+         preference_set_boolean("reverse_resol", false);
+         snprintf(text, sizeof(text), "%d x %d, %dfps", width, height, fps);
+      }
    elm_object_part_text_set(_bottom_layout, "settings_text", text);
+
+   if (rotate == 90)
+      snprintf(text, sizeof(text), "%d x %dpx", height, width);
+   else
+      snprintf(text, sizeof(text), "%d x %dpx", width, height);
+   elm_object_part_text_set(setting_obj, "resolution_text", text);
 
    preference_set_int("width", width);
    preference_set_int("height", height);
@@ -786,8 +848,6 @@ gif_maker_open(char *path)
    elm_slider_value_set(resolution_slider, width < height ? width : height);
    evas_object_smart_callback_add(resolution_slider, "changed", _slider_cb_resolution, setting_obj);
    elm_object_part_content_set(setting_obj, "resolution_slider", resolution_slider);
-   snprintf(text, sizeof(text), "%dx%d px", width, height);
-   elm_object_part_text_set(setting_obj, "resolution_text", text);
 
    elm_naviframe_item_simple_push(_main_naviframe, table);
 }

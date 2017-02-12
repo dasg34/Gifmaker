@@ -88,9 +88,16 @@ create_base_gui()
 static bool
 app_create(void *data)
 {
+   struct stat st = {0};
+
    elm_config_accel_preference_set("gl");
 
 	create_base_gui();
+
+	if (stat("/opt/usr/media/gifmaker", &st) == -1)
+	   {
+	      mkdir("/opt/usr/media/gifmaker", 0700);
+	   }
 
 	return true;
 }
