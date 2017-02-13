@@ -1,7 +1,7 @@
 #define POPUP_PROGRESSBAR_VIEW_LAYOUT_PADDING_INC 15 27
 #define POPUP_PROGRESSBAR_VIEW_LAYOUT_TEXT_FONT_SIZE_INC 24 38
 #define POPUP_PROGRESSBAR_VIEW_LAYOUT_BG_INC 0 69
-#define POPUP_PROGRESSBAR_VIEW_LAYOUT_BG_MIN_INC 0 161
+#define POPUP_PROGRESSBAR_VIEW_LAYOUT_BG_MIN_INC 0 120
 collections {
    base_scale: 2.6;
    group { name: "progressbar";
@@ -61,7 +61,7 @@ collections {
                text {
                   style: "popup_processing_style";
                   min: 0 1;
-                  size: 24;
+                  size: 32;
                }
                color: 0 0 0 255;
                align: 0.0 0.0;

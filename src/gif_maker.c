@@ -110,9 +110,9 @@ _popup_progress_increase()
    layout = evas_object_data_get(_popup, "layout");
    progressbar = evas_object_data_get(_popup, "progressbar");
 
-   snprintf(text, sizeof(text), "%d/%d", frame, _total_frame);
+   snprintf(text, sizeof(text), "%d/%d frame", frame, _total_frame);
    if (frame >= _total_frame)
-      snprintf(text, sizeof(text), "finalization");
+      snprintf(text, sizeof(text), "Finalization...");
    if (thread_cancel)
       snprintf(text, sizeof(text), "Wait...");
 
@@ -134,7 +134,7 @@ _popup_progressbar_show()
    popup = elm_popup_add(_main_naviframe);
    _popup = popup;
    elm_popup_align_set(popup, ELM_NOTIFY_ALIGN_FILL, 1.0);
-   eext_object_event_callback_add(popup, EEXT_CALLBACK_BACK, eext_popup_back_cb, NULL);
+   eext_object_event_callback_add(popup, EEXT_CALLBACK_BACK, _popup_btn_cancel_cb, NULL);
    evas_object_size_hint_weight_set(popup, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 
    /* ok button */
@@ -262,9 +262,9 @@ _layout_cb_start_point_drag(void *data, Evas_Object *obj, const char *emission, 
    player_set_play_position(player, value, false, NULL, NULL);
 
    if (value > _end_value)
-      snprintf(text, sizeof(text), "%.3lf", _end_value / 1000);
+      snprintf(text, sizeof(text), "%.3lfs", _end_value / 1000);
    else
-      snprintf(text, sizeof(text), "%.3lf", value / 1000);
+      snprintf(text, sizeof(text), "%.3lfs", value / 1000);
    elm_object_part_text_set(_bottom_layout, "start_text", text);
 }
 
@@ -306,9 +306,9 @@ _layout_cb_end_point_drag(void *data, Evas_Object *obj, const char *emission, co
    _end_value = max_value - value;
 
    if (_start_value > _end_value)
-      snprintf(text, sizeof(text), "%.3lf", _start_value / 1000);
+      snprintf(text, sizeof(text), "%.3lfs", _start_value / 1000);
    else
-      snprintf(text, sizeof(text), "%.3lf", _end_value / 1000);
+      snprintf(text, sizeof(text), "%.3lfs", _end_value / 1000);
    elm_object_part_text_set(_bottom_layout, "end_text", text);
 }
 
@@ -640,16 +640,24 @@ _slider_cb_fps(void *data, Evas_Object *obj, void *event_info)
    Evas_Object *layout = data;
    double value;
    char text[128];
-   int width, height;
+   int width, height, fps;
+   bool reverse_flag;
 
    value = elm_slider_value_get(obj);
-   snprintf(text, sizeof(text), "%d fps", (int)value);
-   elm_object_part_text_set(layout, "fps_text", text);
    preference_set_int("fps", (int)value);
+   preference_get_int("fps", &fps);
+   snprintf(text, sizeof(text), "%d fps", fps);
+   elm_object_part_text_set(layout, "fps_text", text);
 
    preference_get_int("width", &width);
    preference_get_int("height", &height);
-   snprintf(text, sizeof(text), "%d x %d, %.0lffps", width, height, value);
+   preference_get_boolean("reverse_resol", &reverse_flag);
+
+   if (reverse_flag)
+      snprintf(text, sizeof(text), "%d x %d, %dfps", height, width, fps);
+   else
+      snprintf(text, sizeof(text), "%d x %d, %dfps", width, height, fps);
+
    elm_object_part_text_set(_bottom_layout, "settings_text", text);
 }
 
@@ -751,9 +759,9 @@ gif_maker_open(char *path)
    elm_layout_signal_callback_add(bottom_layout, "button,play", "", _btn_cb_play, NULL);
    elm_layout_signal_callback_add(bottom_layout, "button,make", "", _btn_cb_make, path);
    elm_layout_signal_callback_add(bottom_layout, "button,settings", "", _btn_cb_settings, NULL);
-   snprintf(text, sizeof(text), "%.3lf", _start_value / 1000);
+   snprintf(text, sizeof(text), "%.3lfs", _start_value / 1000);
    elm_object_part_text_set(_bottom_layout, "start_text", text);
-   snprintf(text, sizeof(text), "%.3lf", _end_value / 1000);
+   snprintf(text, sizeof(text), "%.3lfs", _end_value / 1000);
    elm_object_part_text_set(_bottom_layout, "end_text", text);
    evas_object_show(bottom_layout);
    elm_box_pack_end(box, bottom_layout);

@@ -3,7 +3,7 @@
     <profile name="mobile"/>
     <ui-application appid="org.yohoho.gifmaker.ui" exec="gifmaker" hw-acceleration="on" launch_mode="single" multiple="false" nodisplay="false" taskmanage="true" type="capp">
         <label>gifmaker</label>
-        <icon>gifmaker.png</icon>
+        <icon>gifmaker_128.png</icon>
     </ui-application>
     <privileges>
         <privilege>http://tizen.org/privilege/mediastorage</privilege>

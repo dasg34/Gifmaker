@@ -25,7 +25,7 @@ _popup_open()
    popup = elm_popup_add(_main_naviframe);
    elm_popup_align_set(popup, ELM_NOTIFY_ALIGN_FILL, 1.0);
    eext_object_event_callback_add(popup, EEXT_CALLBACK_BACK, eext_popup_back_cb, NULL);
-   elm_object_text_set(popup,"Please select a vidio want to make gif"); //FIXME: wording
+   elm_object_text_set(popup,"Please select a video");
 
    /* ok button */
    btn1 = elm_button_add(popup);

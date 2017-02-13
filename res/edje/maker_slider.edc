@@ -147,25 +147,6 @@ collections {
                }
             }
          }
-         /*
-         part { name: "start_point";
-            scale: 1;
-            description { state: "default" 0.0;
-               image.normal: "ic_point.png";
-               rel1 {
-                  to: "start_bar";
-                  offset: 0 -POINT_SIZE/2;
-               }
-               rel2 {
-                  relative: 1.0 0.0;
-                  to: "start_bar";
-               }
-               min: POINT_SIZE POINT_SIZE;
-               align: 0.5 1.0;
-               color: 188 3 31 255;
-            }
-         }
-         */
          part { name: "end_bar";
             scale: 1;
             description { state: "default" 0.0;
@@ -200,25 +181,49 @@ collections {
                }
             }
          }
-         /*
-         part { name: "end_point";
+
+         part { name: "start_bar_big";
             scale: 1;
             description { state: "default" 0.0;
-               image.normal: "ic_point.png";
+               image.normal: "ic_bar.png";
                rel1 {
-                  to: "end_bar";
-                  offset: 0 -POINT_SIZE/2;
+                  relative: 1.0 0.5;
+                  to: "start_bar";
                }
                rel2 {
-                  relative: 1.0 0.0;
-                  to: "end_bar";
+                  relative: 1.0 0.5;
+                  to: "start_bar";
                }
-               min: POINT_SIZE POINT_SIZE;
-               align: 0.5 1.0;
-               color: 91 221 55 255;
+               min: 0 0;
+               align: 1.0 0.5;
+               color: 76 129 166 255;
+            }
+            description { state: "show" 0.0;
+               inherit: "default" 0.0;
+               min: POINT_WIDTH*3 POINT_WIDTH*6;
             }
          }
-         */
+         part { name: "end_bar_big";
+            scale: 1;
+            description { state: "default" 0.0;
+               image.normal: "ic_bar.png";
+               rel1 {
+                  relative: 0.0 0.5;
+                  to: "end_bar";
+               }
+               rel2 {
+                  relative: 0.0 0.5;
+                  to: "end_bar";
+               }
+               min: 0 0;
+               align: 0.0 0.5;
+               color: 76 129 166 255;
+            }
+            description { state: "show" 0.0;
+               inherit: "default" 0.0;
+               min: POINT_WIDTH*3 POINT_WIDTH*6;
+            }
+         }
          part { name: "start_drag_point";
             type: RECT;
             scale: 1;
@@ -331,36 +336,34 @@ collections {
          */
       }
       programs {
-         /*
          program { 
             signal: "mouse,down,*";
-            source: "start_drag_point";
+            source: "start_drag_block";
             action: STATE_SET "show" 0.0;
-            target: "start_point_big";
+            target: "start_bar_big";
             transition: LINEAR 0.2;
          }
          program {
             signal: "mouse,up,*";
-            source: "start_drag_point";
+            source: "start_drag_block";
             action: STATE_SET "default" 0.0;
-            target: "start_point_big";
+            target: "start_bar_big";
             transition: LINEAR 0.2;
          }
          program {
             signal: "mouse,down,*";
-            source: "end_drag_point";
+            source: "end_drag_block";
             action: STATE_SET "show" 0.0;
-            target: "end_point_big";
+            target: "end_bar_big";
             transition: LINEAR 0.2;
          }
          program {
             signal: "mouse,up,*";
-            source: "end_drag_point";
+            source: "end_drag_block";
             action: STATE_SET "default" 0.0;
-            target: "end_point_big";
+            target: "end_bar_big";
             transition: LINEAR 0.2;
          }
-         */
          program { 
             signal: "drag";
             source: "start_drag_point";
