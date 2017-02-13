@@ -710,6 +710,13 @@ gif_maker_open(char *path)
    evas_object_size_hint_align_set(table, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_show(table);
 
+   Evas_Object *bg = evas_object_image_filled_add(_main_naviframe);
+   evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(bg, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   evas_object_color_set(bg, 0, 0, 0, 255);
+   evas_object_show(bg);
+   elm_table_pack(table, bg, 0, 0, 1, 1);
+
    Evas_Object *rect = evas_object_image_filled_add(_main_naviframe);
    evas_object_size_hint_weight_set(rect, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(rect, EVAS_HINT_FILL, EVAS_HINT_FILL);
@@ -857,5 +864,7 @@ gif_maker_open(char *path)
    evas_object_smart_callback_add(resolution_slider, "changed", _slider_cb_resolution, setting_obj);
    elm_object_part_content_set(setting_obj, "resolution_slider", resolution_slider);
 
-   elm_naviframe_item_simple_push(_main_naviframe, table);
+   Elm_Object_Item *it;
+   it = elm_naviframe_item_insert_after(_main_naviframe, elm_naviframe_top_item_get(_main_naviframe), NULL, NULL, NULL, table, NULL);
+   elm_naviframe_item_title_enabled_set(it, EINA_FALSE, EINA_FALSE);
 }

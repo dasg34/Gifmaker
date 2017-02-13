@@ -1,4 +1,5 @@
 #include <private.h>
+#include <view.h>
 
 #include <mime_type.h>
 #include <media_content.h>
@@ -63,9 +64,16 @@ _gif_select_cb(void *data, Evas_Object *obj, void *event_info)
 static void
 _video_select_cb(void *data, Evas_Object *obj, void *event_info)
 {
+   char *path;
+   media_info_h media;
    Elm_Object_Item *it = event_info;
 
+   elm_gengrid_item_selected_set(it, EINA_FALSE);
 
+   media = elm_object_item_data_get(it);
+   media_info_get_file_path(media, &path);
+   gif_maker_open(path);
+   free(path);
 }
 
 static bool
