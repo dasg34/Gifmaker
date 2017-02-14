@@ -12,4 +12,6 @@ void video_picker_open();
 
 void gif_maker_open(char *path);
 
+void gif_camera_open();
+
 #endif /* VIEW_H_ */

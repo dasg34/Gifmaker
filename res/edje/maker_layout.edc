@@ -53,12 +53,12 @@ collections {
             description { state: "default" 0.0;
                image.normal: "ic_video_add.png";
                rel1 {
-                  //relative: 0.5 0.25;
-                  relative: 0.5 0.4;
+                  relative: 0.5 0.25;
+                  //relative: 0.5 0.4;
                }
                rel2 {
-                  //relative: 0.5 0.25;
-                  relative: 0.5 0.4;
+                  relative: 0.5 0.25;
+                  //relative: 0.5 0.4;
                }
                min: 300 224;
             }
@@ -101,7 +101,6 @@ collections {
                min: 440 370;
             }
          }
-         /*
          part { name: "gifcamera_event";
             scale: 1;
             description { state: "default" 0.0;
@@ -181,7 +180,6 @@ collections {
                min: 440 370;
             }
          }
-         */
       }
       programs {
          program {
@@ -213,7 +211,6 @@ collections {
                emit("button,video2gif", "");
             }
          }
-         /*
          program {
             signal: "mouse,down,*";
             source: "gifcamera_block";
@@ -242,7 +239,6 @@ collections {
                emit("button,gifcamera", "");
             }
          }
-         */
       }
    }
    group { name: "rotation";
@@ -251,16 +247,15 @@ collections {
          part { name: "video2gif";
             description { state: "default" 0.0;
                rel1 {
-                  //relative: 0.25 0.4;
-                  relative: 0.5 0.4;
+                  relative: 0.25 0.4;
+                  //relative: 0.5 0.4;
                }
                rel2 {
-                  //relative: 0.25 0.4;
-                  relative: 0.5 0.4;
+                  relative: 0.25 0.4;
+                  //relative: 0.5 0.4;
                }
             }
          }
-         /*
          part { name: "gifcamera";
             description { state: "default" 0.0;
                rel1 {
@@ -271,7 +266,6 @@ collections {
                }
             }
          }
-         */
       }
    }
 }

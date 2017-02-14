@@ -85,4 +85,30 @@ collections {
          }
       }
    }
+   group { name: "camera";
+      inherit: "main";
+      parts {
+         part { name: "layout";
+            type: SWALLOW;
+            scale: 1;
+            clip_to: "clipper";
+            description { state: "default" 0.0;
+               rel1.relative: 0.0 1.0;
+               rel2.relative: 1.0 1.0;
+               min: 0 100;
+               align: 0.5 1.0;
+            }
+            description { state: "show" 0.0;
+               inherit: "default" 0.0;
+               rel1 {
+                  to: "padding";
+               }
+               rel2 {
+                  relative: 1.0 0.0;
+                  to: "padding";
+               }
+            }
+         }
+      }
+   }
 }

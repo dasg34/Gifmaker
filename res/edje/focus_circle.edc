@@ -1,0 +1,49 @@
+collections {
+   base_scale: 2.6;
+   group { name: "main";
+      images {
+         image: "ic_circle.png" COMP;
+      }
+      parts {
+         part { name: "img";
+            type: IMAGE;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1.relative: 0.5 0.5;
+               rel2.relative: 0.5 0.5;
+               image.normal: "ic_circle.png";
+               min: 150 150;
+            }
+            description { state: "small" 0.0;
+               inherit: "default" 0.0;
+               min: 80 80;
+            }
+            description { state: "final" 0.0;
+               inherit: "default" 0.0;
+               min: 100 100;
+            }
+         }
+      }
+      programs {
+         program {
+            signal: "focus,show";
+            source: "";
+            action: STATE_SET "small" 0.0;
+            target: "img";
+            transition: DECELERATE 0.2;
+            after: "final";
+         }
+         program { name: "final";
+            action: STATE_SET "final" 0.0;
+            target: "img";
+            transition: LINEAR 0.1;
+         }
+         program { 
+            signal: "focus,hide";
+            source: "";
+            action: STATE_SET "default" 0.0;
+            target: "img";
+         }
+      }
+   }
+}

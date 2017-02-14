@@ -1,0 +1,632 @@
+collections {
+   base_scale: 2.6;
+   group { name: "main";
+      images {
+         image: "img_button_bg.png" COMP;
+         image: "ic_record.png" COMP;
+         image: "ic_stop.png" COMP;
+         image: "ic_pause.png" COMP;
+         image: "ic_flash_on.png" COMP;
+         image: "ic_flash_off.png" COMP;
+         image: "ic_camera_flip.png" COMP;
+         image: "ic_arrow.png" COMP;
+         image: "ic_arrow_r.png" COMP;
+         image: "ic_viewer.png" COMP;
+         image: "ic_setting.png" COMP;
+      }
+      sounds {
+         sample {
+            name: "touch_sound" AS_IS;
+            source: "button.wav";
+         }
+      }
+      parts {
+         part { name: "bg";
+            scale: 1;
+            description { state: "default" 0.0;
+               image.normal: "img_button_bg.png";
+               rel1.relative: 0.0 1.0;
+               min: 0 160;
+               align: 0.5 1.0;
+               color: 255 255 255 150;
+            }
+         }
+
+         part { name: "padding_bottom";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1.relative: 0.0 1.0;
+               min: 0 20;
+               align: 0.5 1.0;
+            }
+         }
+         part { name: "padding_left";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel2.relative: 0.0 1.0;
+               min: 20 0;
+               align: 0.0 0.5;
+            }
+         }
+         part { name: "padding_right";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1.relative: 1.0 0.0;
+               min: 20 0;
+               align: 1.0 0.5;
+            }
+         }
+         part { name: "padding_middle1";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to: "record_button";
+               }
+               rel2 {
+                  relative: 1.0 1.0;
+                  to: "record_button";
+               }
+               min: 20 0;
+               align: 0.0 0.5;
+            }
+         }
+         part { name: "padding_middle2";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to_x: "padding_left";
+                  to_y: "record_button";
+               }
+               rel2 {
+                  relative: 0.0 0.0;
+                  to_x: "padding_right";
+                  to_y: "record_button";
+               }
+               min: 0 10;
+               align: 0.0 1.0;
+            }
+         }
+         part { name: "record_text";
+            type: TEXT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.5 0.0;
+                  to: "padding_middle2";
+               }
+               rel2 {
+                  relative: 0.5 0.0;
+                  to: "padding_middle2";
+               }
+               text {
+                  text: "00:00";
+                  size: 32;
+                  min: 1 1;
+                  ellipsis: -1;
+               }
+               align: 0.5 1.0;
+            }
+         }
+         part { name: "slider";
+            type: SWALLOW;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to_x: "padding_left";
+                  to_y: "record_text";
+               }
+               rel2 {
+                  relative: 0.5 0.0;
+                  to_x: "padding_right";
+                  to_y: "record_text";
+               }
+               align: 0.5 1.0;
+               min: 0 50;
+            }
+         }
+         part { name: "record_button";
+            scale: 1;
+            clip_to: "clipper_record";
+            description { state: "default" 0.0;
+               image.normal: "ic_record.png";
+               rel1 {
+                  relative: 0.5 0.0;
+                  to_x: "bg";
+                  to_y: "padding_bottom";
+               }
+               rel2 {
+                  relative: 0.5 0.0;
+                  to_x: "bg";
+                  to_y: "padding_bottom";
+               }
+               min: 100 100;
+               align: 0.5 1.0;
+               color: 255 255 255 160;
+            }
+            description { state: "stop" 0.0;
+               inherit: "default" 0.0;
+               image.normal: "ic_stop.png";
+            }
+         }
+         part { name: "clipper_record";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1.to: "bg";
+               rel2.to: "bg";
+               color: 255 255 255 255;
+            }
+            description { state: "clicked" 0.0;
+               inherit: "default";
+               color: 66 66 66 180;
+            }
+            description { state: "reverse" 0.0;
+               inherit: "default";
+               color: 66 66 66 180;
+            }
+         }
+         part { name: "flash_button";
+            scale: 1;
+            clip_to: "clipper_flash";
+            description { state: "default" 0.0;
+               image.normal: "ic_flash_on.png";
+               rel1 {
+                  relative: 1.0 0.0;
+                  to_x: "padding_middle1";
+                  to_y: "padding_bottom";
+               }
+               rel2 {
+                  relative: 1.0 0.0;
+                  to_x: "padding_middle1";
+                  to_y: "padding_bottom";
+               }
+               min: 80 80;
+               align: 0.0 1.0;
+               color: 255 255 255 160;
+            }
+            description { state: "off" 0.0;
+               inherit: "default" 0.0;
+               image.normal: "ic_flash_off.png";
+            }
+            description { state: "hide" 0.0;
+               inherit: "default" 0.0;
+               visible: 0;
+            }
+         }
+         part { name: "clipper_flash";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1.to: "bg";
+               rel2.to: "bg";
+               color: 255 255 255 255;
+            }
+            description { state: "clicked" 0.0;
+               inherit: "default";
+               color: 66 66 66 180;
+            }
+            description { state: "reverse" 0.0;
+               inherit: "default";
+               color: 66 66 66 180;
+            }
+         }
+         part { name: "viewer_button";
+            scale: 1;
+            clip_to: "clipper_viewer";
+            description { state: "default" 0.0;
+               image.normal: "ic_viewer.png";
+               rel1 {
+                  relative: 0.0 0.0;
+                  to_x: "padding_right";
+                  to_y: "padding_bottom";
+               }
+               rel2 {
+                  relative: 0.0 0.0;
+                  to_x: "padding_right";
+                  to_y: "padding_bottom";
+               }
+               min: 100 100;
+               align: 1.0 1.0;
+               color: 255 255 255 160;
+            }
+            description { state: "hide" 0.0;
+               inherit: "default" 0.0;
+               visible: 0;
+            }
+         }
+         part { name: "clipper_viewer";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1.to: "bg";
+               rel2.to: "bg";
+               color: 255 255 255 255;
+            }
+            description { state: "clicked" 0.0;
+               inherit: "default";
+               color: 66 66 66 180;
+            }
+            description { state: "reverse" 0.0;
+               inherit: "default";
+               color: 66 66 66 180;
+            }
+         }
+         part { name: "pause_button";
+            scale: 1;
+            clip_to: "clipper_pause";
+            description { state: "default" 0.0;
+               image.normal: "ic_pause.png";
+               rel1 {
+                  relative: 1.0 0.0;
+                  to_x: "padding_middle1";
+                  to_y: "padding_bottom";
+               }
+               rel2 {
+                  relative: 1.0 0.0;
+                  to_x: "padding_middle1";
+                  to_y: "padding_bottom";
+               }
+               min: 80 80;
+               align: 0.0 1.0;
+               color: 255 255 255 160;
+               visible: 0;
+            }
+            description { state: "show" 0.0;
+               inherit: "default" 0.0;
+               visible: 1;
+            }
+            description { state: "record" 0.0;
+               inherit: "default" 0.0;
+               image.normal: "ic_record.png";
+               visible: 1;
+            }
+         }
+         part { name: "clipper_pause";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1.to: "bg";
+               rel2.to: "bg";
+               color: 255 255 255 255;
+            }
+            description { state: "clicked" 0.0;
+               inherit: "default";
+               color: 66 66 66 180;
+            }
+            description { state: "reverse" 0.0;
+               inherit: "default";
+               color: 66 66 66 180;
+            }
+         }
+         part { name: "settings_icon";
+            scale: 1;
+            description { state: "default" 0.0;
+               image.normal: "ic_setting.png";
+               rel1 {
+                  relative: 1.0 0.0;
+                  to_x: "padding_left";
+                  to_y: "padding_bottom";
+                  offset: 0 -8;
+               }
+               rel2 {
+                  relative: 1.0 0.0;
+                  to_x: "padding_left";
+                  to_y: "padding_bottom";
+                  offset: 0 -8;
+               }
+               min: 30 30;
+               align: 0.0 1.0;
+            }
+            description { state: "hide" 0.0;
+               inherit: "default" 0.0;
+               visible: 0;
+            }
+         }
+         part { name: "settings_text";
+            type: TEXT;
+            effect: OUTLINE;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to_x: "settings_icon";
+                  to_y: "padding_bottom";
+                  offset: 5 0;
+               }
+               rel2 {
+                  relative: 1.0 0.0;
+                  to_x: "settings_icon";
+                  to_y: "padding_bottom";
+                  offset: 5 0;
+               }
+               text {
+                  text: "680 x 380, 15fps";
+                  size: 30;
+                  ellipsis: -1;
+                  min: 1 0;
+                  align: 0.0 1.0;
+               }
+               color: 255 255 255 255;
+               color2: 0 0 0 255;
+               align: 0.0 1.0;
+            }
+            description { state: "hide" 0.0;
+               inherit: "default" 0.0;
+               visible: 0;
+            }
+         }
+         part { name: "settings_arrow";
+            scale: 1;
+            description { state: "default" 0.0;
+               image.normal: "ic_arrow.png";
+               rel1 {
+                  relative: 0.5 0.2;
+                  to: "settings_event";
+               }
+               rel2 {
+                  relative: 0.5 0.2;
+                  to: "settings_event";
+               }
+               min: 70 35;
+               align: 0.5 0.0;
+            }
+            description { state: "reverse" 0.0;
+               inherit: "default" 0.0;
+               color: 255 255 255 0;
+            }
+            description { state: "hide" 0.0;
+               inherit: "default" 0.0;
+               visible: 0;
+            }
+         }
+         part { name: "settings_arrow_r";
+            scale: 1;
+            description { state: "default" 0.0;
+               image.normal: "ic_arrow_r.png";
+               rel1 {
+                  relative: 0.5 0.2;
+                  to: "settings_event";
+               }
+               rel2 {
+                  relative: 0.5 0.2;
+                  to: "settings_event";
+               }
+               align: 0.5 0.0;
+               min: 70 35;
+               color: 255 255 255 0;
+            }
+            description { state: "reverse" 0.0;
+               inherit: "default" 0.0;
+               color: 255 255 255 255;
+            }
+            description { state: "hide" 0.0;
+               inherit: "default" 0.0;
+               visible: 0;
+            }
+         }
+         part { name: "settings_event";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 1.0 0.0;
+                  to_x: "padding_left";
+                  to_y: "padding_bottom";
+               }
+               rel2 {
+                  relative: 0.0 0.0;
+                  to_x: "record_button";
+                  to_y: "padding_bottom";
+               }
+               min: 0 100;
+               align: 0.5 1.0;
+               color: 0 0 0 0;
+            }
+            description { state: "hide" 0.0;
+               inherit: "default" 0.0;
+               visible: 0;
+            }
+         }
+         part { name: "button_blocker";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1.to: "record_button";
+               rel2.to: "padding_right";
+               visible: 0;
+               color: 0 0 0 0;
+            }
+            description { state: "reverse" 0.0;
+               inherit: "default" 0.0;
+               visible: 1;
+            }
+         }
+      }
+      programs {
+         program {
+            signal: "mouse,down,*";
+            source: "record_button";
+            action: STATE_SET "clicked" 0.0;
+            target: "clipper_record";
+            transition: LINEAR 0.1;
+         }
+         program {
+            signal: "mouse,up,*";
+            source: "record_button";
+            action: STATE_SET "default" 0.0;
+            target: "clipper_record";
+            transition: LINEAR 0.1;
+         }
+         program {
+            signal: "mouse,clicked,*";
+            source: "record_button";
+            script {
+               new st[31], Float:vl;
+               //play_sample("touch_sound", 1.0);
+               get_state(PART:"record_button", st, 30, vl);
+               if (st[0] == 'd') {
+                  emit("button,record", "");
+                  run_program(PROGRAM:"record_button_stop");
+                  set_state(PART:"flash_button", "hide", 0.0);
+                  set_state(PART:"viewer_button", "hide", 0.0);
+                  set_state(PART:"pause_button", "show", 0.0);
+
+                  set_state(PART:"settings_event", "hide", 0.0);
+                  set_state(PART:"settings_arrow", "hide", 0.0);
+                  set_state(PART:"settings_arrow_r", "hide", 0.0);
+                  set_state(PART:"settings_text", "hide", 0.0);
+                  set_state(PART:"settings_icon", "hide", 0.0);
+               }
+               else {
+                  emit("button,stop", "");
+                  run_program(PROGRAM:"record_button_record");
+                  set_state(PART:"flash_button", "default", 0.0);
+                  set_state(PART:"viewer_button", "default", 0.0);
+                  set_state(PART:"pause_button", "default", 0.0);
+
+                  set_state(PART:"settings_event", "default", 0.0);
+                  set_state(PART:"settings_arrow", "default", 0.0);
+                  set_state(PART:"settings_arrow_r", "default", 0.0);
+                  set_state(PART:"settings_text", "default", 0.0);
+                  set_state(PART:"settings_icon", "default", 0.0);
+               }
+            }
+         }
+         program { name: "record_button_stop";
+            action: STATE_SET "stop" 0.0;
+            target: "record_button";
+            transition: LINEAR 0.1;
+         }
+         program { name: "record_button_record";
+            action: STATE_SET "default" 0.0;
+            target: "record_button";
+            transition: LINEAR 0.1;
+         }
+         program {
+            signal: "mouse,down,*";
+            source: "pause_button";
+            action: STATE_SET "clicked" 0.0;
+            target: "clipper_pause";
+         }
+         program {
+            signal: "mouse,up,*";
+            source: "pause_button";
+            action: STATE_SET "default" 0.0;
+            target: "clipper_pause";
+         }
+         program {
+            signal: "mouse,clicked,*";
+            source: "pause_button";
+            script {
+               new st[31], Float:vl;
+               //play_sample("touch_sound", 1.0);
+               get_state(PART:"pause_button", st, 30, vl);
+               if (st[0] == 's') {
+                  emit("button,pause", "");
+                  set_state(PART:"pause_button", "record", 0.0);
+               }
+               else {
+                  emit("button,record", "");
+                  set_state(PART:"pause_button", "show", 0.0);
+               }
+            }
+         }
+         program {
+            signal: "mouse,down,*";
+            source: "flash_button";
+            action: STATE_SET "clicked" 0.0;
+            target: "clipper_flash";
+         }
+         program {
+            signal: "mouse,up,*";
+            source: "flash_button";
+            action: STATE_SET "default" 0.0;
+            target: "clipper_flash";
+         }
+         program {
+            signal: "mouse,clicked,*";
+            source: "flash_button";
+            script {
+               new st[31], Float:vl;
+               //play_sample("touch_sound", 1.0);
+               get_state(PART:"flash_button", st, 30, vl);
+               if (st[0] == 'd') {
+                  emit("button,flash,on", "");
+                  set_state(PART:"flash_button", "off", 0.0);
+               }
+               else {
+                  emit("button,flash,off", "");
+                  set_state(PART:"flash_button", "default", 0.0);
+               }
+            }
+         }
+         program {
+            signal: "mouse,down,*";
+            source: "viewer_button";
+            action: STATE_SET "clicked" 0.0;
+            target: "clipper_viewer";
+         }
+         program {
+            signal: "mouse,up,*";
+            source: "viewer_button";
+            action: STATE_SET "default" 0.0;
+            target: "clipper_viewer";
+         }
+         program {
+            signal: "mouse,clicked,*";
+            source: "viewer_button";
+            script {
+               emit("button,viewer", "");
+            }
+         }
+         program {
+            signal: "mouse,clicked,*";
+            source: "settings_event";
+            script {
+               new st[31], Float:vl;
+               //play_sample("touch_sound", 1.0);
+               get_state(PART:"settings_arrow", st, 30, vl);
+               if (st[0] == 'd') {
+                  run_program(PROGRAM:"settings_show");
+                  emit("button,settings,show", "");
+               }
+               else {
+                  run_program(PROGRAM:"settings_hide");
+                  emit("button,settings,hide", "");
+               }
+
+            }
+         }
+         program { name: "settings_show";
+            signal: "settings,show";
+            action: STATE_SET "reverse" 0.0;
+            target: "settings_arrow";
+            target: "settings_arrow_r";
+            target: "clipper_record";
+            target: "clipper_flash";
+            target: "clipper_viewer";
+            target: "button_blocker";
+            transition: LINEAR 0.1;
+         }
+         program { name: "settings_hide";
+            signal: "settings,hide";
+            action: STATE_SET "default" 0.0;
+            target: "settings_arrow";
+            target: "settings_arrow_r";
+            target: "clipper_record";
+            target: "clipper_flash";
+            target: "clipper_viewer";
+            target: "button_blocker";
+            transition: LINEAR 0.1;
+         }
+      }
+   }
+}

@@ -5,7 +5,13 @@
 static void
 _gif_camera_mouse_up_cb(void *data, Evas_Object *obj, const char *emission, const char *source)
 {
-//TODO
+   char *path;
+
+   path = app_res_path_get("edje/maker_layout.edj");
+
+   gif_camera_open();
+   elm_layout_file_set(obj, path, "main");
+   free(path);
 }
 
 static void

@@ -73,7 +73,6 @@ _video_select_cb(void *data, Evas_Object *obj, void *event_info)
    media = elm_object_item_data_get(it);
    media_info_get_file_path(media, &path);
    gif_maker_open(path);
-   free(path);
 }
 
 static bool

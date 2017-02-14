@@ -450,7 +450,7 @@ _thread_cb_start(void *_path, Ecore_Thread *thread)
    dlog_print(DLOG_ERROR, LOG_TAG, "height : %d", height);
    dlog_print(DLOG_ERROR, LOG_TAG, "rotate : %d", rotate);
 
-   preference_get_int("fps", &fps);
+   preference_get_int("fps_maker", &fps);
 
    total_frame = ((_end_value - _start_value) * fps) / 1000;
    _total_frame = total_frame;
@@ -644,8 +644,8 @@ _slider_cb_fps(void *data, Evas_Object *obj, void *event_info)
    bool reverse_flag;
 
    value = elm_slider_value_get(obj);
-   preference_set_int("fps", (int)value);
-   preference_get_int("fps", &fps);
+   preference_set_int("fps_maker", (int)value);
+   preference_get_int("fps_maker", &fps);
    snprintf(text, sizeof(text), "%d fps", fps);
    elm_object_part_text_set(layout, "fps_text", text);
 
@@ -677,7 +677,7 @@ _slider_cb_resolution(void *data, Evas_Object *obj, void *event_info)
    preference_set_int("width", (int)(value * rate + 1) - (int)(value * rate + 1) % 10);
    preference_set_int("height", value);
 
-   preference_get_int("fps", &fps);
+   preference_get_int("fps_maker", &fps);
    preference_get_int("width", &width);
    preference_get_int("height", &height);
    preference_get_boolean("reverse_resol", &reverse_flag);
@@ -709,13 +709,6 @@ gif_maker_open(char *path)
    evas_object_size_hint_weight_set(table, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(table, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_show(table);
-
-   Evas_Object *bg = evas_object_image_filled_add(_main_naviframe);
-   evas_object_size_hint_weight_set(bg, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-   evas_object_size_hint_align_set(bg, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   evas_object_color_set(bg, 0, 0, 0, 255);
-   evas_object_show(bg);
-   elm_table_pack(table, bg, 0, 0, 1, 1);
 
    Evas_Object *rect = evas_object_image_filled_add(_main_naviframe);
    evas_object_size_hint_weight_set(rect, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
@@ -791,11 +784,11 @@ gif_maker_open(char *path)
    //fps setting
    int fps = -1;
 
-   preference_get_int("fps", &fps);
+   preference_get_int("fps_maker", &fps);
    if (fps < 0)
       {
          fps = 15;
-         preference_set_int("fps", fps);
+         preference_set_int("fps_maker", fps);
       }
 
    Evas_Object *fps_slider = elm_slider_add(setting_obj);
@@ -827,15 +820,15 @@ gif_maker_open(char *path)
    dlog_print(DLOG_ERROR, LOG_TAG, "height : %d", height);
    dlog_print(DLOG_ERROR, LOG_TAG, "rotate : %d", rotate);
    rate = (double)width / height;
-   if (width > 680)
+   if (width > 640)
       {
-         width = 680;
+         width = 640;
          height = width * (1. / rate);
       }
 
    width -= width % 10;
    height -= height % 10;
-   if (rotate == 90)
+   if (rotate == 90 || rotate == 270)
       {
          preference_set_boolean("reverse_resol", true);
          snprintf(text, sizeof(text), "%d x %d, %dfps", height, width, fps);
@@ -847,7 +840,7 @@ gif_maker_open(char *path)
       }
    elm_object_part_text_set(_bottom_layout, "settings_text", text);
 
-   if (rotate == 90)
+   if (rotate == 90 || rotate == 270)
       snprintf(text, sizeof(text), "%d x %dpx", height, width);
    else
       snprintf(text, sizeof(text), "%d x %dpx", width, height);
