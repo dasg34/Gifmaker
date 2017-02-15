@@ -4,7 +4,7 @@
 
 void maker_open();
 
-void viewer_open();
+void viewer_open(Eina_Bool new_win);
 
 void gengrid_item_set(Evas_Object *grid, const char *type);
 

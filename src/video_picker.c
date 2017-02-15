@@ -93,12 +93,12 @@ video_picker_open()
    Evas_Object *btn;
 
    Evas_Object *layout = my_layout_add(_main_naviframe, "edje/gengrid_layout.edj", "main");
+   eext_object_event_callback_add(layout, EEXT_CALLBACK_BACK, _gengrid_back_cb, NULL);
    evas_object_size_hint_weight_set(layout, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(layout, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_show(layout);
 
    Evas_Object *gengrid = elm_gengrid_add(layout);
-   eext_object_event_callback_add(gengrid, EEXT_CALLBACK_BACK, _gengrid_back_cb, NULL);
    elm_gengrid_align_set(gengrid, 0.0, 0.0);
    video_picker_orient_set(gengrid);
 

@@ -6,6 +6,7 @@
 #include <recorder.h>
 #include <app_preference.h>
 #include <media_content.h>
+#include <metadata_extractor.h>
 
 #define FOCUS_CIRCLE_SIZE 50
 
@@ -13,6 +14,13 @@ static camera_h g_camera;
 static recorder_h recorder;
 static Evas_Object *_bottom_layout;
 static Eina_List *resolution_list;
+static Ecore_Timer *record_timer;
+static double record_time;
+static app_event_handler_h handlers;
+
+extern double _end_value;
+
+Elm_Object_Item *it_camera;
 
 typedef struct _video_resolution {
    int width;
@@ -32,10 +40,22 @@ _resolution_list_free()
    resolution_list = NULL;
 }
 
-static void
-_back_cb(void *data, Evas_Object *obj, void *event_info)
+static Eina_Bool
+_record_timer_cb(void *data)
 {
-   app_event_handler_h handlers = data;
+   char text[128];
+
+   record_time += 0.1;
+   snprintf(text, sizeof(text), "00:0%d / 00:05", (int)(record_time + 0.001));
+
+   elm_object_part_text_set(_bottom_layout, "record_text", text);
+
+   return EINA_TRUE;
+}
+
+void
+_camera_back()
+{
    int rots[4] = { 0, 90, 180, 270 };
 
    ui_app_remove_event_handler(handlers);
@@ -46,17 +66,40 @@ _back_cb(void *data, Evas_Object *obj, void *event_info)
    _resolution_list_free();
    elm_naviframe_item_pop(_main_naviframe);
    elm_win_wm_rotation_available_rotations_set(_win, (const int *)(&rots), 4);
+   it_camera = NULL;
+}
+
+static void
+_back_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   int rots[4] = { 0, 90, 180, 270 };
+
+   ui_app_remove_event_handler(handlers);
+   camera_stop_preview(g_camera);
+   camera_destroy(g_camera);
+   recorder_unprepare(recorder);
+   recorder_destroy(recorder);
+   _resolution_list_free();
+   elm_naviframe_item_pop(_main_naviframe);
+   elm_win_wm_rotation_available_rotations_set(_win, (const int *)(&rots), 4);
+   it_camera = NULL;
 }
 
 static void
 _recorder_recording_limit_reached_cb(recorder_recording_limit_type_e type, void *user_data)
 {
-   recorder_commit(recorder);
+   recorder_pause(recorder);
+
+   ecore_timer_del(record_timer);
+   record_timer = NULL;
 }
 
 static bool
 _recorder_supported_video_resolution_cb(int width, int height, void *user_data)
 {
+   if (width > 650)
+      return true;
+
    video_resolution *v_resol = malloc(sizeof(video_resolution));
 
    v_resol->width = width;
@@ -71,6 +114,7 @@ static void
 _recoder_init(Evas_Object *rect)
 {
    char filename[PATH_MAX];
+   char *data_path;
 
    camera_create(CAMERA_DEVICE_CAMERA0, &g_camera);
    camera_set_display(g_camera, CAMERA_DISPLAY_TYPE_EVAS, GET_DISPLAY(rect));
@@ -83,8 +127,10 @@ _recoder_init(Evas_Object *rect)
    recorder_set_file_format(recorder, RECORDER_FILE_FORMAT_MP4);
    recorder_set_video_encoder(recorder, RECORDER_VIDEO_CODEC_MPEG4);
    recorder_set_audio_encoder(recorder, RECORDER_AUDIO_CODEC_DISABLE);
-   //snprintf(filename, sizeof(filename), "%s/gifmaker.mp4", app_get_data_path());
-   snprintf(filename, sizeof(filename), "/opt/usr/media/gifmaker/gifmaker.mp4");
+
+   data_path = app_get_data_path();
+   snprintf(filename, sizeof(filename), "%s/gifmaker.mp4", data_path);
+   free(data_path);
    recorder_set_filename(recorder, filename);
 
    recorder_attr_set_mute(recorder, true);
@@ -126,8 +172,8 @@ _settings_hide(Evas_Object *setting_layout)
    elm_layout_signal_callback_add(setting_layout, "settings,hide,done", "", _settings_cb_hide_done, NULL);
    elm_layout_signal_emit(setting_layout, "settings,hide", "");
 
-   preference_get_int("camera_width", &width);
-   preference_get_int("camera_height", &height);
+   preference_get_int("width", &width);
+   preference_get_int("height", &height);
 
    recorder_set_video_resolution(recorder, width, height);
    camera_stop_preview(g_camera);
@@ -200,8 +246,8 @@ _slider_cb_resolution(void *data, Evas_Object *obj, void *event_info)
    v_resol = eina_list_nth(resolution_list, index);
 
    preference_set_int("camera_index", index);
-   preference_set_int("camera_width", v_resol->width);
-   preference_set_int("camera_height", v_resol->height);
+   preference_set_int("width", v_resol->width);
+   preference_set_int("height", v_resol->height);
    preference_get_int("fps_camera", &fps);
 
    snprintf(text, sizeof(text), "%d x %dpx", v_resol->width, v_resol->height);
@@ -214,22 +260,68 @@ _slider_cb_resolution(void *data, Evas_Object *obj, void *event_info)
 static void
 _btn_cb_record(void *data, Evas_Object *obj, const char *emission, const char *source)
 {
-   int ret = recorder_start(recorder);
+   recorder_start(recorder);
+
+   if (record_timer)
+      ecore_timer_thaw(record_timer);
+   else
+      {
+         record_time = 0;
+         record_timer = ecore_timer_add(0.1, _record_timer_cb, NULL);
+      }
 }
 
 static void
 _btn_cb_stop(void *data, Evas_Object *obj, const char *emission, const char *source)
 {
+   char filename[PATH_MAX];
+   char *data_path;
+   int fps;
+
    recorder_commit(recorder);
-   media_content_connect();
-   media_content_scan_file("/opt/usr/media/gifmaker/gifmaker.mp4");
-   media_content_disconnect();
+   ecore_timer_del(record_timer);
+   record_timer = NULL;
+   elm_object_part_text_set(_bottom_layout, "record_text", "00:00 / 00:05");
+
+   data_path = app_get_data_path();
+   snprintf(filename, sizeof(filename), "%s/gifmaker.mp4", data_path);
+   free(data_path);
+
+   preference_get_int("fps_camera", &fps);
+   preference_set_int("fps_maker", fps);
+
+   _end_value = record_time * 1000;
+
+   _back_cb(NULL, NULL, NULL);
+
+   make_gif(filename);
 }
 
 static void
 _btn_cb_pause(void *data, Evas_Object *obj, const char *emission, const char *source)
 {
    recorder_pause(recorder);
+   ecore_timer_freeze(record_timer);
+}
+
+static void
+_btn_cb_flash_on(void *data, Evas_Object *obj, const char *emission, const char *source)
+{
+   camera_attr_set_flash_mode(g_camera, CAMERA_ATTR_FLASH_MODE_PERMANENT);
+   preference_set_boolean("camera_flash", true);
+}
+
+static void
+_btn_cb_flash_off(void *data, Evas_Object *obj, const char *emission, const char *source)
+{
+   camera_attr_set_flash_mode(g_camera, CAMERA_ATTR_FLASH_MODE_OFF);
+   preference_set_boolean("camera_flash", false);
+}
+
+static void
+_btn_cb_viewer(void *data, Evas_Object *obj, const char *emission, const char *source)
+{
+   viewer_open(EINA_TRUE);
 }
 
 static void
@@ -285,8 +377,8 @@ _camera_cb_focus_set(void *data, Evas *e, Evas_Object *obj, void *event_info)
    int width, height, w, h, cw;
    double new_height, pad;
    camera_attr_clear_af_area(g_camera);
-   preference_get_int("camera_height", &height);
-   preference_get_int("camera_width", &width);
+   preference_get_int("height", &height);
+   preference_get_int("width", &width);
    evas_object_geometry_get(obj, NULL, NULL, &w, &h);
 
    new_height = width * (w / (double)height);
@@ -307,18 +399,12 @@ _camera_cb_focus_set(void *data, Evas *e, Evas_Object *obj, void *event_info)
 void
 gif_camera_open()
 {
-   app_event_handler_h handlers;
-   ui_app_add_event_handler(&handlers, APP_EVENT_DEVICE_ORIENTATION_CHANGED, _on_rotate_cb, NULL);
-   elm_win_wm_rotation_available_rotations_set(_win, NULL, 0);
-   elm_win_rotation_with_resize_set(_win, EINA_FALSE);
-
    //focus circle
    Evas_Object *img = my_layout_add(_main_naviframe, "edje/focus_circle.edj", "main");
 
    Evas_Object *table = elm_table_add(_main_naviframe);
    evas_object_size_hint_weight_set(table, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(table, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_object_orientation_mode_disabled_set(table, EINA_TRUE);
    evas_object_show(table);
 
    Evas_Object *bg = evas_object_rectangle_add(evas_object_evas_get(table));
@@ -332,7 +418,6 @@ gif_camera_open()
    evas_object_size_hint_weight_set(rect, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(rect, EVAS_HINT_FILL, EVAS_HINT_FILL);
    evas_object_event_callback_add(rect, EVAS_CALLBACK_MOUSE_UP, _camera_cb_focus_set, img);
-   elm_object_orientation_mode_disabled_set(rect, EINA_TRUE);
    evas_object_show(rect);
    elm_table_pack(table, rect, 0, 0, 1, 1);
 
@@ -356,6 +441,11 @@ gif_camera_open()
    elm_layout_signal_callback_add(bottom_layout, "button,record", "", _btn_cb_record, NULL);
    elm_layout_signal_callback_add(bottom_layout, "button,stop", "", _btn_cb_stop, NULL);
    elm_layout_signal_callback_add(bottom_layout, "button,pause", "", _btn_cb_pause, NULL);
+   elm_layout_signal_callback_add(bottom_layout, "button,flash,on", "", _btn_cb_flash_on, NULL);
+   elm_layout_signal_callback_add(bottom_layout, "button,flash,off", "", _btn_cb_flash_off, NULL);
+   elm_layout_signal_callback_add(bottom_layout, "button,viewer", "", _btn_cb_viewer, NULL);
+
+
    elm_box_pack_end(box, bottom_layout);
    evas_object_show(bottom_layout);
 
@@ -382,12 +472,12 @@ gif_camera_open()
    preference_get_int("fps_camera", &fps);
    if (fps < 0)
       {
-         fps = 10;
+         fps = 7;
          preference_set_int("fps_camera", fps);
       }
 
    Evas_Object *fps_slider = elm_slider_add(setting_obj);
-   elm_slider_min_max_set(fps_slider, 1, 10);
+   elm_slider_min_max_set(fps_slider, 1, 7);
    elm_slider_step_set(fps_slider, 1.0);
    elm_slider_value_set(fps_slider, fps);
    elm_object_part_content_set(setting_obj, "fps_slider", fps_slider);
@@ -423,13 +513,16 @@ gif_camera_open()
    elm_object_part_text_set(setting_obj, "resolution_text", text);
 
    preference_set_int("camera_index", index);
-   preference_set_int("camera_width", v_resol->width);
-   preference_set_int("camera_height", v_resol->height);
+   preference_set_int("width", v_resol->width);
+   preference_set_int("height", v_resol->height);
    recorder_set_video_resolution(recorder, v_resol->width, v_resol->height);
    camera_set_preview_resolution(g_camera, v_resol->width, v_resol->height);
 
+   preference_set_boolean("camera_flash", false);
 
+   it_camera = elm_naviframe_item_simple_push(_main_naviframe, table);
 
-   //evas_object_smart_callback_add(_main_naviframe, "transition,finished", _on_transition_finished, rect);
-   elm_naviframe_item_simple_push(_main_naviframe, table);
+   ui_app_add_event_handler(&handlers, APP_EVENT_DEVICE_ORIENTATION_CHANGED, _on_rotate_cb, NULL);
+   elm_win_wm_rotation_available_rotations_set(_win, NULL, 0);
+   elm_win_rotation_with_resize_set(_win, 0);
 }

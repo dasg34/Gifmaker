@@ -106,7 +106,7 @@ collections {
                   to: "padding_middle2";
                }
                text {
-                  text: "00:00";
+                  text: "00:00 / 00:05";
                   size: 32;
                   min: 1 1;
                   ellipsis: -1;
@@ -114,6 +114,7 @@ collections {
                align: 0.5 1.0;
             }
          }
+         /*
          part { name: "slider";
             type: SWALLOW;
             scale: 1;
@@ -132,6 +133,7 @@ collections {
                min: 0 50;
             }
          }
+         */
          part { name: "record_button";
             scale: 1;
             clip_to: "clipper_record";
@@ -177,7 +179,7 @@ collections {
             scale: 1;
             clip_to: "clipper_flash";
             description { state: "default" 0.0;
-               image.normal: "ic_flash_on.png";
+               image.normal: "ic_flash_off.png";
                rel1 {
                   relative: 1.0 0.0;
                   to_x: "padding_middle1";
@@ -192,9 +194,9 @@ collections {
                align: 0.0 1.0;
                color: 255 255 255 160;
             }
-            description { state: "off" 0.0;
+            description { state: "on" 0.0;
                inherit: "default" 0.0;
-               image.normal: "ic_flash_off.png";
+               image.normal: "ic_flash_on.png";
             }
             description { state: "hide" 0.0;
                inherit: "default" 0.0;
@@ -488,7 +490,16 @@ collections {
                else {
                   emit("button,stop", "");
                   run_program(PROGRAM:"record_button_record");
-                  set_state(PART:"flash_button", "default", 0.0);
+                  new st2[31], Float:vl2;
+                  //play_sample("touch_sound", 1.0);
+                  get_state(PART:"flash_button", st2, 30, vl2);
+                  if (st[0] == 'd') {
+                     set_state(PART:"flash_button", "default", 0.0);
+                  }
+                  else {
+                     set_state(PART:"flash_button", "on", 0.0);
+                  }
+                  set_state(PART:"record_text", "default", 0.0);
                   set_state(PART:"viewer_button", "default", 0.0);
                   set_state(PART:"pause_button", "default", 0.0);
 
@@ -560,7 +571,7 @@ collections {
                get_state(PART:"flash_button", st, 30, vl);
                if (st[0] == 'd') {
                   emit("button,flash,on", "");
-                  set_state(PART:"flash_button", "off", 0.0);
+                  set_state(PART:"flash_button", "on", 0.0);
                }
                else {
                   emit("button,flash,off", "");

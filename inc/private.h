@@ -16,6 +16,12 @@
 #define PACKAGE "org.yohoho.gifmaker"
 #endif
 
+#define DEBUG 1
+
+#if DEBUG == 1
+#define dlog_print(...) ;
+#endif
+
 extern Evas_Object *_main_naviframe, *_main_layout, *_win;
 
 #endif /* __gifmaker_H__ */

@@ -58,6 +58,7 @@ _gif_select_cb(void *data, Evas_Object *obj, void *event_info)
    app_control_set_uri(app_control, path);
    app_control_set_operation(app_control, APP_CONTROL_OPERATION_VIEW);
    app_control_send_launch_request(app_control, NULL, NULL);
+   app_control_destroy(app_control);
    free(path);
 }
 

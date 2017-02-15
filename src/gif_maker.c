@@ -21,8 +21,9 @@ typedef struct _v_data {
 static player_h player;
 static Evas_Object *_main_slider, *_slider_layout, *_popup, *_bottom_layout, *_setting_layout;
 static Ecore_Timer *_slider_timer;
-static double _start_value, _end_value = 999999;
+static double _start_value;
 static Eina_Bool drag_start;
+double _end_value = 999999;
 
 static int _total_frame;
 static char **argv;
@@ -33,6 +34,19 @@ static Ecore_Thread *_gif_maker_thread;
 static Eina_Bool thread_cancel;
 
 static void
+_popup_cancel_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   Evas_Object *layout, *btn = data;
+
+   thread_cancel = EINA_TRUE;
+   layout = evas_object_data_get(_popup, "layout");
+   elm_object_part_text_set(layout, "elm.text.description", "Wait...");
+   elm_object_disabled_set(btn, EINA_TRUE);
+
+   ecore_thread_cancel(_gif_maker_thread);
+}
+
+static void
 _popup_btn_cancel_cb(void *data, Evas_Object *obj, void *event_info)
 {
    Evas_Object *layout;
@@ -40,6 +54,7 @@ _popup_btn_cancel_cb(void *data, Evas_Object *obj, void *event_info)
    thread_cancel = EINA_TRUE;
    layout = evas_object_data_get(_popup, "layout");
    elm_object_part_text_set(layout, "elm.text.description", "Wait...");
+   elm_object_disabled_set(obj, EINA_TRUE);
 
    ecore_thread_cancel(_gif_maker_thread);
 }
@@ -134,7 +149,6 @@ _popup_progressbar_show()
    popup = elm_popup_add(_main_naviframe);
    _popup = popup;
    elm_popup_align_set(popup, ELM_NOTIFY_ALIGN_FILL, 1.0);
-   eext_object_event_callback_add(popup, EEXT_CALLBACK_BACK, _popup_btn_cancel_cb, NULL);
    evas_object_size_hint_weight_set(popup, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 
    /* ok button */
@@ -143,6 +157,7 @@ _popup_progressbar_show()
    elm_object_text_set(btn, "Cancel");
    elm_object_part_content_set(popup, "button1", btn);
    evas_object_smart_callback_add(btn, "clicked", _popup_btn_cancel_cb, popup);
+   eext_object_event_callback_add(popup, EEXT_CALLBACK_BACK, _popup_cancel_cb, btn);
 
    /* layout */
    layout = my_layout_add(popup, "edje/popup.edj", "progressbar");
@@ -185,7 +200,6 @@ _box_back_cb(void *data, Evas_Object *obj, void *event_info)
    player_unprepare(player);
    player_destroy(player);
    player = NULL;
-   eina_lock_free(&mutex);
 }
 
 static void
@@ -437,13 +451,20 @@ _thread_cb_start(void *_path, Ecore_Thread *thread)
 
    metadata_extractor_create(&metadata_h);
    metadata_extractor_set_path(metadata_h, path);
-   free(path);
-
    metadata_extractor_get_metadata(metadata_h, METADATA_ROTATE, &temp_value);
    if (temp_value)
-      rotate = atoi(temp_value);
+      {
+         rotate = atoi(temp_value);
+         free(temp_value);
+      }
 
-   player_get_video_size(player, &width, &height);
+   metadata_extractor_get_metadata(metadata_h, METADATA_VIDEO_WIDTH, &temp_value);
+   width = atoi(temp_value);
+   free(temp_value);
+   metadata_extractor_get_metadata(metadata_h, METADATA_VIDEO_HEIGHT, &temp_value);
+   height = atoi(temp_value);
+   free(temp_value);
+   //player_get_video_size(player, &width, &height);
 
    dlog_print(DLOG_ERROR, LOG_TAG, "_end_value : %lf", _end_value);
    dlog_print(DLOG_ERROR, LOG_TAG, "width : %d", width);
@@ -535,43 +556,50 @@ _thread_cb_start(void *_path, Ecore_Thread *thread)
    media_content_scan_file(out_path);
    media_content_disconnect();
 
+   app_control_h app_control;
+   app_control_create(&app_control);
+   app_control_set_uri(app_control, out_path);
+   app_control_set_operation(app_control, APP_CONTROL_OPERATION_VIEW);
+   app_control_send_launch_request(app_control, NULL, NULL);
+   app_control_destroy(app_control);
+
    ecore_thread_main_loop_begin();
    _popup_toast_open("Success!");
    ecore_thread_main_loop_end();
+
 }
 
 static void
 _thread_cb_end(void *data, Ecore_Thread *thread)
 {
+   char *path = data;
    device_power_release_lock(POWER_LOCK_DISPLAY);
-
 
    dlog_print(DLOG_INFO, LOG_TAG, "end time : %u", time(NULL));
    evas_object_del(_popup);
+   eina_lock_free(&mutex);
+
+   free(path);
 }
 
 static void
 _thread_cb_cancel(void *data, Ecore_Thread *thread)
 {
+   char *path = data;
    while(ecore_thread_active_get() > 1)
       sleep(1);
    device_power_release_lock(POWER_LOCK_DISPLAY);
    evas_object_del(_popup);
+   eina_lock_free(&mutex);
+   free(path);
 }
 
 static void
 _btn_cb_make(void *data, Evas_Object *obj, const char *emission, const char *source)
 {
    char *path = data;
-   char cmd[1024];
 
-   thread_cancel = EINA_FALSE;
-   device_power_request_lock(POWER_LOCK_DISPLAY, 0);
-   snprintf(cmd, sizeof(cmd), "exec rm -r %s/*", app_get_data_path());
-   system(cmd);
-
-   _gif_maker_thread = ecore_thread_run(_thread_cb_start, _thread_cb_end, _thread_cb_cancel, strdup(path));
-   _popup_progressbar_show();
+   make_gif(path);
 }
 
 
@@ -703,8 +731,6 @@ gif_maker_open(char *path)
    _start_value = 0;
    drag_start = EINA_FALSE;
 
-   eina_lock_new(&mutex);
-
    Evas_Object *table = elm_table_add(_main_naviframe);
    evas_object_size_hint_weight_set(table, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(table, EVAS_HINT_FILL, EVAS_HINT_FILL);
@@ -813,7 +839,10 @@ gif_maker_open(char *path)
    metadata_extractor_get_metadata(metadata_h, METADATA_ROTATE, &temp_value);
    metadata_extractor_destroy(metadata_h);
    if (temp_value)
-      rotate = atoi(temp_value);
+      {
+         rotate = atoi(temp_value);
+         free(temp_value);
+      }
 
    player_get_video_size(player, &width, &height);
    dlog_print(DLOG_ERROR, LOG_TAG, "width : %d", width);
@@ -860,4 +889,19 @@ gif_maker_open(char *path)
    Elm_Object_Item *it;
    it = elm_naviframe_item_insert_after(_main_naviframe, elm_naviframe_top_item_get(_main_naviframe), NULL, NULL, NULL, table, NULL);
    elm_naviframe_item_title_enabled_set(it, EINA_FALSE, EINA_FALSE);
+}
+
+void
+make_gif(char *path)
+{
+   char cmd[1024];
+
+   eina_lock_new(&mutex);
+   thread_cancel = EINA_FALSE;
+   device_power_request_lock(POWER_LOCK_DISPLAY, 0);
+   snprintf(cmd, sizeof(cmd), "exec rm -r %s/*.gif", app_get_data_path());
+   system(cmd);
+
+   _gif_maker_thread = ecore_thread_run(_thread_cb_start, _thread_cb_end, _thread_cb_cancel, strdup(path));
+   _popup_progressbar_show();
 }

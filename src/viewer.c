@@ -55,7 +55,10 @@ _scroll_stop_cb(void *data, Evas_Object *obj, void *event_info)
 static void
 _layout_back_cb(void *data, Evas_Object *obj, void *event_info)
 {
-   ui_app_exit();
+   if (data)
+      elm_naviframe_item_pop(_main_naviframe);
+   else
+      ui_app_exit();
 }
 
 static char *
@@ -116,9 +119,9 @@ viewer_orient_set(Evas_Object *gengrid)
    system_info_get_platform_int("http://tizen.org/feature/screen.height", &height);
 
    if (rotation == 90 || rotation == 270)
-      elm_gengrid_item_size_set(gengrid, height / 3, width / 2);
+      elm_gengrid_item_size_set(gengrid, height / 2, width / 1.7);
    else
-      elm_gengrid_item_size_set(gengrid, width / 2, height / 4);
+      elm_gengrid_item_size_set(gengrid, width, height / 2.7);
 }
 
 static void
@@ -128,21 +131,23 @@ _win_rotation_cb(void *data, Evas_Object *obj, void *event_info)
 }
 
 void
-viewer_open()
+viewer_open(Eina_Bool new_win)
 {
-   int height, width;
    Elm_Gengrid_Item_Class *gic;
 
    Evas_Object *layout = my_layout_add(_main_naviframe, "edje/gengrid_layout.edj", "main");
    evas_object_size_hint_weight_set(layout, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    evas_object_size_hint_align_set(layout, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   if (new_win)
+      eext_object_event_callback_add(layout, EEXT_CALLBACK_BACK, _layout_back_cb, layout);
+   else
+      eext_object_event_callback_add(layout, EEXT_CALLBACK_BACK, _layout_back_cb, NULL);
    evas_object_show(layout);
 
    Evas_Object *gengrid = elm_gengrid_add(layout);
    evas_object_smart_callback_add(gengrid, "scroll", _scroll_start_cb, NULL);
    evas_object_smart_callback_add(gengrid, "scroll,drag,stop", _scroll_stop_cb, NULL);
    evas_object_smart_callback_add(gengrid, "scroll,anim,stop", _scroll_stop_cb, NULL);
-   eext_object_event_callback_add(gengrid, EEXT_CALLBACK_BACK, _layout_back_cb, NULL);
    elm_gengrid_align_set(gengrid, 0.0, 0.0);
    viewer_orient_set(gengrid);
 
@@ -170,8 +175,15 @@ viewer_open()
    else
       elm_object_part_content_set(layout, "gengrid", gengrid);
 
-   evas_object_del(elm_object_content_unset(_main_naviframe));
-   elm_object_content_set(_main_naviframe, layout);
-
    evas_object_smart_callback_add(_win, "wm,rotation,changed", _win_rotation_cb, gengrid);
+
+   if (new_win)
+      {
+         elm_naviframe_item_simple_push(_main_naviframe, layout);
+      }
+   else
+      {
+         evas_object_del(elm_object_content_unset(_main_naviframe));
+         elm_object_content_set(_main_naviframe, layout);
+      }
 }

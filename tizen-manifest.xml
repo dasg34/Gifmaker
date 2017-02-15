@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <manifest xmlns="http://tizen.org/ns/packages" api-version="2.4" package="org.yohoho.gifmaker" version="1.0.0">
     <profile name="mobile"/>
-    <ui-application appid="org.yohoho.gifmaker.ui" exec="gifmaker" hw-acceleration="on" launch_mode="single" multiple="false" nodisplay="false" taskmanage="true" type="capp">
+    <ui-application appid="org.yohoho.gifmaker.ui" exec="gifmaker" hw-acceleration="on" multiple="false" nodisplay="false" taskmanage="true" type="capp">
         <label>gifmaker</label>
         <icon>gifmaker_128.png</icon>
     </ui-application>
@@ -14,4 +14,6 @@
         <privilege>http://tizen.org/privilege/camera</privilege>
         <privilege>http://tizen.org/privilege/content.write</privilege>
     </privileges>
+    <feature name="http://tizen.org/feature/screen.size.normal.480.800">true</feature>
+    <feature name="http://tizen.org/feature/screen.size.normal.720.1280">true</feature>
 </manifest>
