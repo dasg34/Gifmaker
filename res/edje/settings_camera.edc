@@ -16,12 +16,12 @@ collections {
             description { state: "default" 0.0;
                rel1 {
                   relative: 1.0 0.0;
-                  to_x: "fps_title";
+                  to_x: "duration_title";
                   to_y: "bg";
                }
                rel2 {
                   relative: 1.0 1.0;
-                  to_x: "fps_title";
+                  to_x: "duration_title";
                   to_y: "bg";
                }
                min: 40 0;
@@ -80,18 +80,18 @@ collections {
                rel1 {
                   relative: 0.0 1.0;
                   to_x: "space_left";
-                  to_y: "fps_text";
+                  to_y: "duration_text";
                }
                rel2 {
                   relative: 1.0 1.0;
                   to_x: "space_right";
-                  to_y: "fps_text";
+                  to_y: "duration_text";
                }
                min: 0 20;
                align: 1.0 0.0;
             }
          }
-         part { name: "fps_title";
+         part { name: "duration_title";
             type: TEXT;
             scale: 1;
             description { state: "default" 0.0;
@@ -106,7 +106,7 @@ collections {
                   to_y: "space_top";
                }
                text {
-                  text: "FPS";
+                  text: "Duration";
                   size: FONT_SIZE;
                   ellipsis: -1;
                   min: 1 1;
@@ -116,20 +116,20 @@ collections {
                color: 0 0 0 255;
             }
          }
-         part { name: "fps_text";
+         part { name: "duration_text";
             type: TEXT;
             scale: 1;
             description { state: "default" 0.0;
                rel1 {
                   relative: 0.0 1.0;
-                  to: "fps_title";
+                  to: "duration_title";
                }
                rel2 {
                   relative: 0.0 1.0;
-                  to: "fps_title";
+                  to: "duration_title";
                }
                text {
-                  text: "15 fps";
+                  text: "5.123s";
                   size: FONT_SIZE-4;
                   ellipsis: -1;
                   min: 1 1;
@@ -139,19 +139,19 @@ collections {
                color: 0 0 0 255;
             }
          }
-         part { name: "fps_slider";
+         part { name: "duration_slider";
             type: SWALLOW;
             scale: 1;
             description { state: "default" 0.0;
                rel1 {
                   relative: 1.0 0.0;
                   to_x: "space_middle";
-                  to_y: "fps_title";
+                  to_y: "duration_title";
                }
                rel2 {
                   relative: 0.0 1.0;
                   to_x: "space_right";
-                  to_y: "fps_text";
+                  to_y: "duration_text";
                }
                align: 0.0 0.0;
             }

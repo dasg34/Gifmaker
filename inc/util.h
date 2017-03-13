@@ -8,4 +8,8 @@ Evas_Object *my_layout_add(Evas_Object *parent, const char *edj_name, const char
 
 void make_gif(char *path);
 
+void gif_recorder_unprepare();
+
+void gif_recorder_prepare();
+
 #endif /* UTIL_H_ */

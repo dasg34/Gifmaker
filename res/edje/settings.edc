@@ -16,12 +16,12 @@ collections {
             description { state: "default" 0.0;
                rel1 {
                   relative: 1.0 0.0;
-                  to_x: "resolution_title";
+                  to_x: "duration_title";
                   to_y: "bg";
                }
                rel2 {
                   relative: 1.0 1.0;
-                  to_x: "resolution_title";
+                  to_x: "duration_title";
                   to_y: "bg";
                }
                min: 40 0;
@@ -80,12 +80,12 @@ collections {
                rel1 {
                   relative: 0.0 1.0;
                   to_x: "space_left";
-                  to_y: "resolution_text";
+                  to_y: "duration_text";
                }
                rel2 {
                   relative: 1.0 1.0;
                   to_x: "space_right";
-                  to_y: "resolution_text";
+                  to_y: "duration_text";
                }
                min: 0 20;
                align: 1.0 0.0;
@@ -187,7 +187,7 @@ collections {
                align: 0 0;
             }
          }
-         part { name: "resolution_title";
+         part { name: "duration_title";
             type: TEXT;
             scale: 1;
             description { state: "default" 0.0;
@@ -202,7 +202,7 @@ collections {
                   to_y: "space_middle2";
                }
                text {
-                  text: "Resolution";
+                  text: "Duration";
                   size: FONT_SIZE;
                   ellipsis: -1;
                   min: 1 1;
@@ -212,20 +212,20 @@ collections {
                color: 0 0 0 255;
             }
          }
-         part { name: "resolution_text";
+         part { name: "duration_text";
             type: TEXT;
             scale: 1;
             description { state: "default" 0.0;
                rel1 {
                   relative: 0.0 1.0;
-                  to: "resolution_title";
+                  to: "duration_title";
                }
                rel2 {
                   relative: 0.0 1.0;
-                  to: "resolution_title";
+                  to: "duration_title";
                }
                text {
-                  text: "680x480px";
+                  text: "5s";
                   size: FONT_SIZE-4;
                   ellipsis: -1;
                   min: 1 1;
@@ -235,32 +235,32 @@ collections {
                color: 0 0 0 255;
             }
          }
-         part { name: "resolution_event";
+         part { name: "duration_event";
             type: RECT;
             scale: 1;
             description { state: "default" 0.0;
                rel1 {
-                  to: "resolution_title";
+                  to: "duration_title";
                }
                rel2 {
-                  to: "resolution_text";
+                  to: "duration_text";
                }
                color: 0 0 0 0;
             }
          }
-         part { name: "resolution_slider";
+         part { name: "duration_slider";
             type: SWALLOW;
             scale: 1;
             description { state: "default" 0.0;
                rel1 {
                   relative: 1.0 0.0;
                   to_x: "space_middle";
-                  to_y: "resolution_title";
+                  to_y: "duration_title";
                }
                rel2 {
                   relative: 0.0 1.0;
                   to_x: "space_right";
-                  to_y: "resolution_text";
+                  to_y: "duration_text";
                }
                align: 0.0 0.0;
             }
@@ -269,8 +269,8 @@ collections {
       programs {
          program {
             signal: "mouse,clicked,*";
-            source: "resolution_event";
-            action: SIGNAL_EMIT "mouse,clicked,resolution" "";
+            source: "duration_event";
+            action: SIGNAL_EMIT "mouse,clicked,duration" "";
          }
       }
    }

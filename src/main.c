@@ -6,8 +6,6 @@ Evas_Object *_main_naviframe, *_main_layout, *_win;
 
 extern Elm_Object_Item *it_camera;
 
-void _camera_back();
-
 static void
 win_delete_request_cb(void *data, Evas_Object *obj, void *event_info)
 {
@@ -116,13 +114,14 @@ static void
 app_pause(void *data)
 {
    if (it_camera)
-      _camera_back();
+      gif_recorder_unprepare();
 }
 
 static void
 app_resume(void *data)
 {
-	/* Take necessary actions when application becomes visible. */
+   if (it_camera)
+      gif_recorder_prepare();
 }
 
 static void

@@ -13,6 +13,7 @@ collections {
          image: "ic_arrow_r.png" COMP;
          image: "ic_viewer.png" COMP;
          image: "ic_setting.png" COMP;
+         image: "ic_camera_flip.png" COMP;
       }
       sounds {
          sample {
@@ -93,6 +94,22 @@ collections {
                align: 0.0 1.0;
             }
          }
+         part { name: "padding_middle3";
+            type: SPACER;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1 {
+                  relative: 0.0 0.0;
+                  to: "record_button";
+               }
+               rel2 {
+                  relative: 0.0 1.0;
+                  to: "record_button";
+               }
+               min: 20 0;
+               align: 1.0 0.5;
+            }
+         }
          part { name: "record_text";
             type: TEXT;
             scale: 1;
@@ -106,7 +123,7 @@ collections {
                   to: "padding_middle2";
                }
                text {
-                  text: "00:00 / 00:05";
+                  text: "0.000 / 5.123";
                   size: 32;
                   min: 1 1;
                   ellipsis: -1;
@@ -204,6 +221,47 @@ collections {
             }
          }
          part { name: "clipper_flash";
+            type: RECT;
+            scale: 1;
+            description { state: "default" 0.0;
+               rel1.to: "bg";
+               rel2.to: "bg";
+               color: 255 255 255 255;
+            }
+            description { state: "clicked" 0.0;
+               inherit: "default";
+               color: 66 66 66 180;
+            }
+            description { state: "reverse" 0.0;
+               inherit: "default";
+               color: 66 66 66 180;
+            }
+         }
+         part { name: "flip_button";
+            scale: 1;
+            clip_to: "clipper_flip";
+            description { state: "default" 0.0;
+               image.normal: "ic_camera_flip.png";
+               rel1 {
+                  relative: 0.0 0.0;
+                  to_x: "padding_middle3";
+                  to_y: "padding_bottom";
+               }
+               rel2 {
+                  relative: 0.0 0.0;
+                  to_x: "padding_middle3";
+                  to_y: "padding_bottom";
+               }
+               min: 80 80;
+               align: 1.0 1.0;
+               color: 255 255 255 160;
+            }
+            description { state: "hide" 0.0;
+               inherit: "default" 0.0;
+               visible: 0;
+            }
+         }
+         part { name: "clipper_flip";
             type: RECT;
             scale: 1;
             description { state: "default" 0.0;
@@ -350,7 +408,7 @@ collections {
                   offset: 5 0;
                }
                text {
-                  text: "680 x 380, 15fps";
+                  text: "5.123s";
                   size: 30;
                   ellipsis: -1;
                   min: 1 0;
@@ -425,7 +483,7 @@ collections {
                }
                rel2 {
                   relative: 0.0 0.0;
-                  to_x: "record_button";
+                  to_x: "flip_button";
                   to_y: "padding_bottom";
                }
                min: 0 100;
@@ -441,7 +499,8 @@ collections {
             type: RECT;
             scale: 1;
             description { state: "default" 0.0;
-               rel1.to: "record_button";
+               rel1.relative: 1.0 0.0;
+               rel1.to: "settings_event";
                rel2.to: "padding_right";
                visible: 0;
                color: 0 0 0 0;
@@ -479,6 +538,7 @@ collections {
                   run_program(PROGRAM:"record_button_stop");
                   set_state(PART:"flash_button", "hide", 0.0);
                   set_state(PART:"viewer_button", "hide", 0.0);
+                  set_state(PART:"flip_button", "hide", 0.0);
                   set_state(PART:"pause_button", "show", 0.0);
 
                   set_state(PART:"settings_event", "hide", 0.0);
@@ -501,6 +561,51 @@ collections {
                   }
                   set_state(PART:"record_text", "default", 0.0);
                   set_state(PART:"viewer_button", "default", 0.0);
+                  set_state(PART:"flip_button", "default", 0.0);
+                  set_state(PART:"pause_button", "default", 0.0);
+
+                  set_state(PART:"settings_event", "default", 0.0);
+                  set_state(PART:"settings_arrow", "default", 0.0);
+                  set_state(PART:"settings_arrow_r", "default", 0.0);
+                  set_state(PART:"settings_text", "default", 0.0);
+                  set_state(PART:"settings_icon", "default", 0.0);
+               }
+            }
+         }
+         program {
+            signal: "ui_change";
+            source: "record_button";
+            script {
+               new st[31], Float:vl;
+               //play_sample("touch_sound", 1.0);
+               get_state(PART:"record_button", st, 30, vl);
+               if (st[0] == 'd') {
+                  run_program(PROGRAM:"record_button_stop");
+                  set_state(PART:"flash_button", "hide", 0.0);
+                  set_state(PART:"viewer_button", "hide", 0.0);
+                  set_state(PART:"flip_button", "hide", 0.0);
+                  set_state(PART:"pause_button", "show", 0.0);
+
+                  set_state(PART:"settings_event", "hide", 0.0);
+                  set_state(PART:"settings_arrow", "hide", 0.0);
+                  set_state(PART:"settings_arrow_r", "hide", 0.0);
+                  set_state(PART:"settings_text", "hide", 0.0);
+                  set_state(PART:"settings_icon", "hide", 0.0);
+               }
+               else {
+                  run_program(PROGRAM:"record_button_record");
+                  new st2[31], Float:vl2;
+                  //play_sample("touch_sound", 1.0);
+                  get_state(PART:"flash_button", st2, 30, vl2);
+                  if (st[0] == 'd') {
+                     set_state(PART:"flash_button", "default", 0.0);
+                  }
+                  else {
+                     set_state(PART:"flash_button", "on", 0.0);
+                  }
+                  set_state(PART:"record_text", "default", 0.0);
+                  set_state(PART:"viewer_button", "default", 0.0);
+                  set_state(PART:"flip_button", "default", 0.0);
                   set_state(PART:"pause_button", "default", 0.0);
 
                   set_state(PART:"settings_event", "default", 0.0);
@@ -580,6 +685,37 @@ collections {
             }
          }
          program {
+            signal: "flash,hide";
+            source: "";
+            action: STATE_SET "hide" 0.0;
+            target: "flash_button";
+         }
+         program {
+            signal: "flash,show";
+            source: "";
+            action: STATE_SET "default" 0.0;
+            target: "flash_button";
+         }
+         program {
+            signal: "mouse,down,*";
+            source: "flip_button";
+            action: STATE_SET "clicked" 0.0;
+            target: "clipper_flip";
+         }
+         program {
+            signal: "mouse,up,*";
+            source: "flip_button";
+            action: STATE_SET "default" 0.0;
+            target: "clipper_flip";
+         }
+         program {
+            signal: "mouse,clicked,*";
+            source: "flip_button";
+            script {
+               emit("button,flip", "");
+            }
+         }
+         program {
             signal: "mouse,down,*";
             source: "viewer_button";
             action: STATE_SET "clicked" 0.0;
@@ -624,6 +760,7 @@ collections {
             target: "clipper_record";
             target: "clipper_flash";
             target: "clipper_viewer";
+            target: "clipper_flip";
             target: "button_blocker";
             transition: LINEAR 0.1;
          }
@@ -635,6 +772,7 @@ collections {
             target: "clipper_record";
             target: "clipper_flash";
             target: "clipper_viewer";
+            target: "clipper_flip";
             target: "button_blocker";
             transition: LINEAR 0.1;
          }

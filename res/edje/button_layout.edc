@@ -55,47 +55,6 @@ collections {
                align: 1.0 0.5;
             }
          }
-         part { name: "play_button";
-            scale: 1;
-            clip_to: "clipper_middle";
-            description { state: "default" 0.0;
-               image.normal: "ic_play.png";
-               rel1 {
-                  relative: 0.5 0.0;
-                  to_x: "bg";
-                  to_y: "padding_bottom";
-               }
-               rel2 {
-                  relative: 0.5 0.0;
-                  to_x: "bg";
-                  to_y: "padding_bottom";
-               }
-               min: 100 100;
-               align: 0.5 1.0;
-               color: 255 255 255 160;
-            }
-            description { state: "pause" 0.0;
-               inherit: "default" 0.0;
-               image.normal: "ic_pause.png";
-            }
-         }
-         part { name: "clipper_middle";
-            type: RECT;
-            scale: 1;
-            description { state: "default" 0.0;
-               rel1.to: "bg";
-               rel2.to: "bg";
-               color: 255 255 255 255;
-            }
-            description { state: "clicked" 0.0;
-               inherit: "default";
-               color: 66 66 66 180;
-            }
-            description { state: "reverse" 0.0;
-               inherit: "default";
-               color: 66 66 66 180;
-            }
-         }
          part { name: "clipper_right";
             type: RECT;
             scale: 1;
@@ -118,14 +77,17 @@ collections {
             scale: 1;
             description { state: "default" 0.0;
                rel1 {
-                  relative: 1.0 0.0;
-                  to: "play_button";
-               }
-               rel2 {
-                  relative: 0.0 0.0;
-                  to_x: "padding_right";
+                  relative: 0.5 0.0;
+                  to_x: "bg";
                   to_y: "padding_bottom";
                }
+               rel2 {
+                  relative: 0.5 0.0;
+                  to_x: "bg";
+                  to_y: "padding_bottom";
+               }
+               min: 200 100;
+               align: 0.5 1.0;
             }
          }
          part { name: "make_button";
@@ -238,8 +200,8 @@ collections {
                   to_y: "bg";
                }
                text {
-                  text: "0.123";
-                  size: 26;
+                  text: "Start Time : 0.123s";
+                  size: 30;
                   ellipsis: -1;
                   min: 1 0;
                   align: 0.0 0.0;
@@ -247,33 +209,6 @@ collections {
                color: 255 255 255 255;
                color2: 0 0 0 255;
                align: 0.0 0.0;
-            }
-         }
-         part { name: "end_text";
-            type: TEXT;
-            effect: OUTLINE;
-            scale: 1;
-            description { state: "default" 0.0;
-               rel1 {
-                  relative: 0.0 0.0;
-                  to_x: "padding_right";
-                  to_y: "bg";
-               }
-               rel2 {
-                  relative: 0.0 0.0;
-                  to_x: "padding_right";
-                  to_y: "bg";
-               }
-               text {
-                  text: "0.123";
-                  size: 26;
-                  ellipsis: -1;
-                  min: 1 0;
-                  align: 0.0 0.0;
-               }
-               color: 255 255 255 255;
-               color2: 0 0 0 255;
-               align: 1.0 0.0;
             }
          }
          part { name: "settings_arrow";
@@ -328,7 +263,7 @@ collections {
                }
                rel2 {
                   relative: 0.0 0.0;
-                  to_x: "play_button";
+                  to_x: "make_button";
                   to_y: "padding_bottom";
                }
                min: 0 100;
@@ -340,7 +275,7 @@ collections {
             type: RECT;
             scale: 1;
             description { state: "default" 0.0;
-               rel1.to: "play_button";
+               rel1.to: "make_button";
                rel2.to: "make_button";
                visible: 0;
                color: 0 0 0 0;
@@ -352,40 +287,6 @@ collections {
          }
       }
       programs {
-         program {
-            signal: "mouse,down,*";
-            source: "play_button";
-            action: STATE_SET "clicked" 0.0;
-            target: "clipper_middle";
-            transition: LINEAR 0.1;
-         }
-         program {
-            signal: "mouse,up,*";
-            source: "play_button";
-            action: STATE_SET "default" 0.0;
-            target: "clipper_middle";
-            transition: LINEAR 0.1;
-         }
-         program {
-            signal: "mouse,clicked,*";
-            source: "play_button";
-            script {
-               //play_sample("touch_sound", 1.0);
-               emit("button,play", "");
-            }
-         }
-         program {
-            signal: "pause";
-            source: "play_button";
-            action: STATE_SET "pause" 0.0;
-            target: "play_button";
-         }
-         program {
-            signal: "play";
-            source: "play_button";
-            action: STATE_SET "default" 0.0;
-            target: "play_button";
-         }
          program {
             signal: "mouse,down,*";
             source: "make_button";
@@ -419,7 +320,6 @@ collections {
             target: "settings_arrow";
             target: "settings_arrow_r";
             target: "clipper_right";
-            target: "clipper_middle";
             target: "button_blocker";
             transition: LINEAR 0.1;
          }
@@ -429,7 +329,6 @@ collections {
             target: "settings_arrow";
             target: "settings_arrow_r";
             target: "clipper_right";
-            target: "clipper_middle";
             target: "button_blocker";
             transition: LINEAR 0.1;
          }
